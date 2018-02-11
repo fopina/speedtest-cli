@@ -1,11 +1,11 @@
 package speedtest
 
 import (
-	"time"
-	"log"
-	"io"
 	"fmt"
+	"io"
+	"log"
 	"os"
+	"time"
 )
 
 const downloadStreamLimit = 6
@@ -21,8 +21,8 @@ func (client *Client) downloadFile(url string, start time.Time, ret chan int) {
 		ret <- totalRead
 	}()
 
-	if (time.Since(start) > maxDownloadDuration) {
-		return;
+	if time.Since(start) > maxDownloadDuration {
+		return
 	}
 	if !client.opts.Quiet {
 		os.Stdout.WriteString(".")
@@ -32,7 +32,7 @@ func (client *Client) downloadFile(url string, start time.Time, ret chan int) {
 	resp, err := client.Get(url)
 	if err != nil {
 		log.Printf("[%s] Download failed: %v\n", url, err)
-		return;
+		return
 	}
 
 	defer resp.Body.Close()
@@ -76,7 +76,7 @@ func (server *Server) DownloadSpeed() int {
 		close(starterChan)
 	}()
 
-	var totalSize int64 = 0;
+	var totalSize int64 = 0
 
 	for i := 0; i < downloads; i++ {
 		totalSize += int64(<-resultChan)
@@ -87,7 +87,7 @@ func (server *Server) DownloadSpeed() int {
 		os.Stdout.Sync()
 	}
 
-	duration := time.Since(start);
+	duration := time.Since(start)
 
 	return int(totalSize * int64(time.Second) / int64(duration))
 }

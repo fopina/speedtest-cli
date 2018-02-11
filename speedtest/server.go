@@ -2,27 +2,27 @@ package speedtest
 
 import (
 	"errors"
-	"sort"
 	"fmt"
-	"time"
-	"net/url"
 	"log"
+	"net/url"
+	"sort"
+	"time"
 )
 
 type ServerID uint64
 
 type Server struct {
 	Coordinates
-	URL      string `xml:"url,attr"`
-	Name     string `xml:"name,attr"`
-	Country  string `xml:"country,attr"`
-	CC       string `xml:"cc,attr"`
-	Sponsor  string `xml:"sponsor,attr"`
-	ID       ServerID `xml:"id,attr"`
-	URL2     string `xml:"url2,attr"`
-	Host     string `xml:"host,attr"`
-	client   *Client `xml:"-"`
-	Distance float64 `xml:"-"`
+	URL      string        `xml:"url,attr"`
+	Name     string        `xml:"name,attr"`
+	Country  string        `xml:"country,attr"`
+	CC       string        `xml:"cc,attr"`
+	Sponsor  string        `xml:"sponsor,attr"`
+	ID       ServerID      `xml:"id,attr"`
+	URL2     string        `xml:"url2,attr"`
+	Host     string        `xml:"host,attr"`
+	client   *Client       `xml:"-"`
+	Distance float64       `xml:"-"`
 	Latency  time.Duration `xml:"-"`
 }
 
@@ -38,7 +38,7 @@ func (s *Server) RelativeURL(local string) string {
 	}
 	localURL, err := url.Parse(local)
 	if err != nil {
-		log.Fatalf("Failed to parse local URL `%s`: %v\n", local, err);
+		log.Fatalf("Failed to parse local URL `%s`: %v\n", local, err)
 	}
 	return u.ResolveReference(localURL).String()
 }
@@ -65,7 +65,7 @@ func (servers *Servers) Find(id ServerID) *Server {
 			return server
 		}
 	}
-	return nil;
+	return nil
 }
 
 func (servers *Servers) Len() int {
@@ -76,10 +76,10 @@ func (servers *Servers) Less(i, j int) bool {
 	server1 := servers.List[i]
 	server2 := servers.List[j]
 	if server1.ID == server2.ID {
-		return false;
+		return false
 	}
 	if server1.Distance < server2.Distance {
-		return true;
+		return true
 	}
 	if server1.Distance > server2.Distance {
 		return false
@@ -90,13 +90,13 @@ func (servers *Servers) Less(i, j int) bool {
 func (servers *Servers) Swap(i, j int) {
 	temp := servers.List[i]
 	servers.List[i] = servers.List[j]
-	servers.List[j] = temp;
+	servers.List[j] = temp
 }
 
 func (servers *Servers) truncate(max int) *Servers {
 	size := servers.Len()
 	if size <= max {
-		return servers;
+		return servers
 	}
 	return &Servers{servers.List[:max]}
 }
@@ -119,19 +119,19 @@ func (servers *Servers) append(other *Servers) *Servers {
 
 func (servers *Servers) sort(client *Client, config *Config) {
 	for _, server := range servers.List {
-		server.client = client;
+		server.client = client
 		server.Distance = server.DistanceTo(config.Client.Coordinates)
 	}
 	sort.Sort(servers)
 }
 
 func (servers *Servers) deduplicate() {
-	dedup := make([]*Server, 0, len(servers.List));
-	var prevId ServerID = 0;
+	dedup := make([]*Server, 0, len(servers.List))
+	var prevId ServerID = 0
 	for _, server := range servers.List {
 		if prevId != server.ID {
 			prevId = server.ID
-			dedup = append(dedup, server);
+			dedup = append(dedup, server)
 		}
 	}
 	servers.List = dedup
@@ -165,13 +165,13 @@ func (client *Client) LoadAllServers(ret chan ServersRef) {
 	go func() {
 		result := <-client.allServers
 		ret <- result
-		client.allServers <- result// Make it available again
+		client.allServers <- result // Make it available again
 	}()
 }
 
 func (client *Client) loadServers() {
 	configChan := make(chan ConfigRef)
-	client.LoadConfig(configChan);
+	client.LoadConfig(configChan)
 
 	client.Log("Retrieving speedtest.net server list...")
 
@@ -183,7 +183,7 @@ func (client *Client) loadServers() {
 	var servers *Servers
 
 	for range serverURLs {
-		servers = servers.append(<-serversChan);
+		servers = servers.append(<-serversChan)
 	}
 
 	result := ServersRef{}
@@ -239,7 +239,7 @@ func (client *Client) LoadClosestServers(ret chan ServersRef) {
 	go func() {
 		result := <-client.closestServers
 		ret <- result
-		client.closestServers <- result// Make it available again
+		client.closestServers <- result // Make it available again
 	}()
 }
 

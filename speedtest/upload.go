@@ -1,12 +1,12 @@
 package speedtest
 
 import (
-	"time"
-	"os"
-	"log"
-	"io"
-	"strings"
 	"crypto/rand"
+	"io"
+	"log"
+	"os"
+	"strings"
+	"time"
 )
 
 const maxUploadDuration = maxDownloadDuration
@@ -19,7 +19,7 @@ func init() {
 
 	var uploadSizeSizes = []int{int(1000 * 1000 / 4), int(1000 * 1000 / 2)}
 
-	uploadSizes = make([]int, len(uploadSizeSizes) * 25)
+	uploadSizes = make([]int, len(uploadSizeSizes)*25)
 	for _, size := range uploadSizeSizes {
 		for i := 0; i < 25; i++ {
 			uploadSizes[i] = size
@@ -37,7 +37,7 @@ func (r safeReader) Read(p []byte) (n int, err error) {
 	n, err = r.in.Read(p)
 
 	for i := 0; i < n; i++ {
-		p[i] = safeChars[p[i] & 31]
+		p[i] = safeChars[p[i]&31]
 	}
 
 	return n, err
@@ -49,8 +49,8 @@ func (client *Client) uploadFile(url string, start time.Time, size int, ret chan
 		ret <- totalWrote
 	}()
 
-	if (time.Since(start) > maxUploadDuration) {
-		return;
+	if time.Since(start) > maxUploadDuration {
+		return
 	}
 	if !client.opts.Quiet {
 		os.Stdout.WriteString(".")
@@ -62,10 +62,10 @@ func (client *Client) uploadFile(url string, start time.Time, size int, ret chan
 		"application/x-www-form-urlencoded",
 		io.MultiReader(
 			strings.NewReader("content1="),
-			io.LimitReader(&safeReader{rand.Reader}, int64(size - 9))))
+			io.LimitReader(&safeReader{rand.Reader}, int64(size-9))))
 	if err != nil {
 		log.Printf("[%s] Upload failed: %v\n", url, err)
-		return;
+		return
 	}
 
 	totalWrote = size
@@ -99,7 +99,7 @@ func (server *Server) UploadSpeed() int {
 		close(starterChan)
 	}()
 
-	var totalSize int64 = 0;
+	var totalSize int64 = 0
 
 	for i := 0; i < uploads; i++ {
 		totalSize += int64(<-resultChan)
@@ -110,7 +110,7 @@ func (server *Server) UploadSpeed() int {
 		os.Stdout.Sync()
 	}
 
-	duration := time.Since(start);
+	duration := time.Since(start)
 
 	return int(totalSize * int64(time.Second) / int64(duration))
 }

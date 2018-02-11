@@ -1,15 +1,15 @@
 package speedtest
 
 import (
-	"net/http"
+	"encoding/xml"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
+	"net"
+	"net/http"
 	"runtime"
 	"strings"
-	"io"
-	"net"
-	"log"
-	"encoding/xml"
-	"io/ioutil"
 	"sync"
 )
 
@@ -26,7 +26,7 @@ type Response http.Response
 
 func NewClient(opts *Opts) *Client {
 	dialer := &net.Dialer{
-		Timeout: opts.Timeout,
+		Timeout:   opts.Timeout,
 		KeepAlive: opts.Timeout,
 	}
 
@@ -38,21 +38,21 @@ func NewClient(opts *Opts) *Client {
 	}
 
 	transport := &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		Dial: dialer.Dial,
-		TLSHandshakeTimeout: opts.Timeout,
+		Proxy:                 http.ProxyFromEnvironment,
+		Dial:                  dialer.Dial,
+		TLSHandshakeTimeout:   opts.Timeout,
 		ExpectContinueTimeout: opts.Timeout,
 	}
 
 	client := &Client{
 		Client: http.Client{
 			Transport: transport,
-			Timeout: opts.Timeout,
+			Timeout:   opts.Timeout,
 		},
 		opts: opts,
 	}
 
-	return client;
+	return client
 }
 
 func (client *Client) NewRequest(method string, url string, body io.Reader) (*http.Request, error) {
@@ -63,27 +63,27 @@ func (client *Client) NewRequest(method string, url string, body io.Reader) (*ht
 			url = "http" + url
 		}
 	}
-	req, err := http.NewRequest(method, url, body);
+	req, err := http.NewRequest(method, url, body)
 	if err == nil {
 		req.Header.Set(
 			"User-Agent",
-			"Mozilla/5.0 " +
-				fmt.Sprintf("(%s; U; %s; en-us)", runtime.GOOS, runtime.GOARCH) +
-				fmt.Sprintf("Go/%s", runtime.Version()) +
+			"Mozilla/5.0 "+
+				fmt.Sprintf("(%s; U; %s; en-us)", runtime.GOOS, runtime.GOARCH)+
+				fmt.Sprintf("Go/%s", runtime.Version())+
 				fmt.Sprintf("(KHTML, like Gecko) speedtest-cli/%s", Version))
 	}
-	return req, err;
+	return req, err
 }
 
 func (client *Client) Get(url string) (resp *Response, err error) {
-	req, err := client.NewRequest("GET", url, nil);
+	req, err := client.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	htResp, err := client.Client.Do(req)
 
-	return (*Response)(htResp), err;
+	return (*Response)(htResp), err
 }
 
 func (client *Client) Post(url string, bodyType string, body io.Reader) (resp *Response, err error) {
@@ -95,25 +95,25 @@ func (client *Client) Post(url string, bodyType string, body io.Reader) (resp *R
 	req.Header.Set("Content-Type", bodyType)
 	htResp, err := client.Client.Do(req)
 
-	return (*Response)(htResp), err;
+	return (*Response)(htResp), err
 }
 
 func (resp *Response) ReadContent() ([]byte, error) {
 	content, err := ioutil.ReadAll(resp.Body)
 	cerr := resp.Body.Close()
 	if err != nil {
-		return nil, err;
+		return nil, err
 	}
 	if cerr != nil {
-		return content, cerr;
+		return content, cerr
 	}
-	return content, nil;
+	return content, nil
 }
 
 func (resp *Response) ReadXML(out interface{}) error {
 	content, err := resp.ReadContent()
 	if err != nil {
-		return err;
+		return err
 	}
 	return xml.Unmarshal(content, out)
 }
