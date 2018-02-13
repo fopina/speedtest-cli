@@ -84,7 +84,7 @@ func (client *Client) LoadAllServers(ctx context.Context, cfg Config) ([]Server,
 }
 
 func (client *Client) loadServersFrom(ctx context.Context, url string) ([]Server, error) {
-	resp, err := client.Get(ctx, url)
+	resp, err := client.get(ctx, url)
 	if resp != nil {
 		url = resp.Request.URL.String()
 	}

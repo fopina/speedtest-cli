@@ -14,7 +14,7 @@ import (
 
 type Client http.Client
 
-type Response http.Response
+type response http.Response
 
 func NewClient(opts *Opts) (*Client, error) {
 	client := &Client{}
@@ -35,12 +35,12 @@ func NewClient(opts *Opts) (*Client, error) {
 	return client, nil
 }
 
-func (client *Client) Get(ctx context.Context, url string) (resp *Response, err error) {
+func (client *Client) get(ctx context.Context, url string) (resp *response, err error) {
 	htResp, err := ctxhttp.Get(ctx, (*http.Client)(client), url)
-	return (*Response)(htResp), err
+	return (*response)(htResp), err
 }
 
-func (client *Client) Post(ctx context.Context, url string, bodyType string, body io.Reader) (resp *Response, err error) {
+func (client *Client) post(ctx context.Context, url string, bodyType string, body io.Reader) (resp *response, err error) {
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return nil, err
@@ -49,10 +49,10 @@ func (client *Client) Post(ctx context.Context, url string, bodyType string, bod
 	req.Header.Set("Content-Type", bodyType)
 	htResp, err := ctxhttp.Do(ctx, (*http.Client)(client), req)
 
-	return (*Response)(htResp), err
+	return (*response)(htResp), err
 }
 
-func (resp *Response) ReadContent() ([]byte, error) {
+func (resp *response) ReadContent() ([]byte, error) {
 	content, err := ioutil.ReadAll(resp.Body)
 	cerr := resp.Body.Close()
 	if err != nil {
@@ -64,7 +64,7 @@ func (resp *Response) ReadContent() ([]byte, error) {
 	return content, nil
 }
 
-func (resp *Response) ReadXML(out interface{}) error {
+func (resp *response) ReadXML(out interface{}) error {
 	content, err := resp.ReadContent()
 	if err != nil {
 		return err

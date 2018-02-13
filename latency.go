@@ -76,7 +76,7 @@ func (server *Server) Latency(ctx context.Context, client *Client) (time.Duratio
 		return time.Duration(0), fmt.Errorf("could not parse realtive path to latency.txt: %v", err)
 	}
 
-	resp, err := client.Get(ctx, url)
+	resp, err := client.get(ctx, url)
 
 	if resp != nil {
 		url = resp.Request.URL.String()

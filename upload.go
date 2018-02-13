@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"sync"
-	"time"
 )
 
 const (
@@ -36,56 +34,26 @@ func (r safeReader) Read(p []byte) (n int, err error) {
 
 // Will probe upload speed until enough samples are taken or ctx expires.
 func (server *Server) ProbeUploadSpeed(ctx context.Context, client *Client) (BytesPerSecond, error) {
-	sem := make(chan struct{}, concurrentUploadLimit)
-	results := make(chan bytesTransferred)
-	var wg sync.WaitGroup
-
-	var lastErr error // Keep the last transfer error in case nothing works.
-	errors := make(chan error)
-	go func() {
-		for err := range errors {
-			lastErr = err
-		}
-	}()
-
-	start := time.Now()
+	pg := newProberGroup(concurrentDownloadLimit)
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 
 	for _, size := range uploadSizes {
 		for i := 0; i < uploadRepeats; i++ {
-			wg.Add(1)
-			go func(url string, size int) {
-				sem <- struct{}{}
-
-				if err := client.uploadFile(ctx, url, size); err != nil {
-					errors <- err
-				} else {
-					results <- bytesTransferred(size)
+			pg.Add(func(size int) func() (bytesTransferred, error) {
+				return func() (bytesTransferred, error) {
+					err := client.uploadFile(ctx, server.URL, size)
+					if err != nil {
+						return bytesTransferred(0), err
+					} else {
+						return bytesTransferred(size), nil
+					}
 				}
-
-				<-sem
-				wg.Done()
-			}(server.URL, size)
+			}(size))
 		}
 	}
 
-	go func() {
-		wg.Wait()
-		close(results)
-		close(errors)
-	}()
-
-	var totalSize bytesTransferred
-	for b := range results {
-		totalSize += b
-	}
-
-	if totalSize == bytesTransferred(0) {
-		return BytesPerSecond(0), lastErr
-	}
-
-	duration := time.Since(start)
-
-	return BytesPerSecond(int64(totalSize) * int64(time.Second) / int64(duration)), nil
+	return pg.Collect()
 }
 
 func (client *Client) uploadFile(ctx context.Context, url string, size int) error {
@@ -96,7 +64,7 @@ func (client *Client) uploadFile(ctx context.Context, url string, size int) erro
 	default:
 	}
 
-	res, err := client.Post(ctx, url, "application/x-www-form-urlencoded",
+	res, err := client.post(ctx, url, "application/x-www-form-urlencoded",
 		io.MultiReader(
 			strings.NewReader("content1="),
 			io.LimitReader(&safeReader{rand.Reader}, int64(size-9))))

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"sync"
 	"time"
 )
 
@@ -15,43 +14,11 @@ const downloadRepeats = 5
 
 var downloadImageSizes = []int{350, 500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000}
 
-type bytesTransferred int
-
-type BytesPerSecond float64
-
-const (
-	KBps BytesPerSecond = 1000
-	MBps                = 1000 * KBps
-	GBps                = 1000 * MBps
-)
-
-func (s BytesPerSecond) String() string {
-	if s < KBps {
-		return fmt.Sprintf("%.0f B/s", s)
-	} else if s < MBps {
-		return fmt.Sprintf("%.02f KB/s", s/KBps)
-	} else if s < GBps {
-		return fmt.Sprintf("%.02f MB/s", s/MBps)
-	} else {
-		return fmt.Sprintf("%.02f GB/s", s/GBps)
-	}
-}
-
 // Will probe download speed until enough samples are taken or ctx expires.
 func (server Server) ProbeDownloadSpeed(ctx context.Context, client *Client) (BytesPerSecond, error) {
-	sem := make(chan struct{}, concurrentDownloadLimit)
-	results := make(chan bytesTransferred)
-	var wg sync.WaitGroup
-
-	var lastErr error // Keep the last transfer error in case nothing works.
-	errors := make(chan error)
-	go func() {
-		for err := range errors {
-			lastErr = err
-		}
-	}()
-
-	start := time.Now()
+	pg := newProberGroup(concurrentDownloadLimit)
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 
 	for _, size := range downloadImageSizes {
 		for i := 0; i < downloadRepeats; i++ {
@@ -60,40 +27,15 @@ func (server Server) ProbeDownloadSpeed(ctx context.Context, client *Client) (By
 				return 0, fmt.Errorf("error parsing url for %v: %v", server, err)
 			}
 
-			wg.Add(1)
-			go func(url string) {
-				sem <- struct{}{}
-
-				bytes, err := client.downloadFile(ctx, url)
-				if err != nil {
-					errors <- err
+			pg.Add(func(url string) func() (bytesTransferred, error) {
+				return func() (bytesTransferred, error) {
+					return client.downloadFile(ctx, url)
 				}
-				results <- bytes
-
-				<-sem
-				wg.Done()
-			}(url)
+			}(url))
 		}
 	}
 
-	go func() {
-		wg.Wait()
-		close(results)
-		close(errors)
-	}()
-
-	var totalSize bytesTransferred
-	for b := range results {
-		totalSize += b
-	}
-
-	if totalSize == bytesTransferred(0) {
-		return BytesPerSecond(0), lastErr
-	}
-
-	duration := time.Since(start)
-
-	return BytesPerSecond(float64(totalSize) * float64(time.Second) / float64(duration)), nil
+	return pg.Collect()
 }
 
 func (client *Client) downloadFile(ctx context.Context, url string) (bytesTransferred, error) {
@@ -109,7 +51,7 @@ func (client *Client) downloadFile(ctx context.Context, url string) (bytesTransf
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	resp, err := client.Get(ctx, url)
+	resp, err := client.get(ctx, url)
 	if err != nil {
 		return t, err
 	}

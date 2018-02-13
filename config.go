@@ -17,7 +17,7 @@ type Config struct {
 }
 
 func (client *Client) Config(ctx context.Context) (Config, error) {
-	resp, err := client.Get(ctx, "https://www.speedtest.net/speedtest-config.php")
+	resp, err := client.get(ctx, "https://www.speedtest.net/speedtest-config.php")
 	if err != nil {
 		return Config{}, err
 	}
