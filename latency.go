@@ -51,14 +51,14 @@ func StableSortServersByAverageLatency(servers []Server, ctx context.Context, cl
 // single latency probe to a server, that server is not a good candidate for a
 // speed test.
 //
-func (server Server) AverageLatency(ctx context.Context, client *Client, samples int) (time.Duration, error) {
+func (s Server) AverageLatency(ctx context.Context, client *Client, samples int) (time.Duration, error) {
 	if samples <= 0 {
 		return time.Duration(0), fmt.Errorf("samples must be positive; was %v", samples)
 	}
 
 	var total time.Duration
 	for i := 0; i < samples; i++ {
-		if d, err := server.Latency(ctx, client); err != nil {
+		if d, err := s.Latency(ctx, client); err != nil {
 			return time.Duration(0), err
 		} else {
 			total += d
@@ -68,10 +68,10 @@ func (server Server) AverageLatency(ctx context.Context, client *Client, samples
 	return total / time.Duration(samples), nil
 }
 
-func (server *Server) Latency(ctx context.Context, client *Client) (time.Duration, error) {
+func (s Server) Latency(ctx context.Context, client *Client) (time.Duration, error) {
 	start := time.Now()
 
-	url, err := server.RelativeURL("latency.txt")
+	url, err := s.RelativeURL("latency.txt")
 	if err != nil {
 		return time.Duration(0), fmt.Errorf("could not parse realtive path to latency.txt: %v", err)
 	}

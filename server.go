@@ -49,28 +49,30 @@ var serverURLs = []string{
 	"https://c.speedtest.net/speedtest-servers.php",
 }
 
-func (client *Client) LoadAllServers(ctx context.Context) ([]Server, error) {
+func (c *Client) LoadAllServers(ctx context.Context) ([]Server, error) {
 	grp, ctx := errgroup.WithContext(ctx)
 
-	c := make(chan []Server)
-	for _, url := range serverURLs {
+	// Spread.
+	ch := make(chan []Server)
+	for _, u := range serverURLs {
 		grp.Go(func() error {
-			if s, err := client.loadServersFrom(ctx, url); err != nil {
+			if s, err := c.loadServersFrom(ctx, u); err != nil {
 				return err
 			} else {
-				c <- s
+				ch <- s
 				return nil
 			}
 		})
 	}
 
+	// Collect.
 	var servers []Server
 	go func() {
 		for {
 			select {
 			case <-ctx.Done():
 				return
-			case s := <-c:
+			case s := <-ch:
 				servers = append(servers, s...)
 			}
 		}
@@ -83,10 +85,10 @@ func (client *Client) LoadAllServers(ctx context.Context) ([]Server, error) {
 	}
 }
 
-func (client *Client) loadServersFrom(ctx context.Context, url string) ([]Server, error) {
-	resp, err := client.get(ctx, url)
-	if resp != nil {
-		url = resp.Request.URL.String()
+func (c *Client) loadServersFrom(ctx context.Context, url string) ([]Server, error) {
+	res, err := c.get(ctx, url)
+	if res != nil {
+		url = res.Request.URL.String()
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve server list from %q: %v", url, err)
@@ -100,7 +102,7 @@ func (client *Client) loadServersFrom(ctx context.Context, url string) ([]Server
 		} `xml:"servers>server"`
 	}{}
 
-	if err = resp.ReadXML(&doc); err != nil {
+	if err = res.ReadXML(&doc); err != nil {
 		return nil, fmt.Errorf("failed to parse server list from %q: %v", url, err)
 	}
 
@@ -130,10 +132,8 @@ func dedupAndSort(servers []Server) []Server {
 	}
 
 	d = d[:t]
-
 	sort.Slice(d, func(i, j int) bool {
 		return d[i].ID < d[j].ID
 	})
-
 	return d
 }

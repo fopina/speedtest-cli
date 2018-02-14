@@ -16,8 +16,8 @@ type Config struct {
 	Rating             float32 `xml:"rating,attr"`
 }
 
-func (client *Client) Config(ctx context.Context) (Config, error) {
-	resp, err := client.get(ctx, "https://www.speedtest.net/speedtest-config.php")
+func (c *Client) Config(ctx context.Context) (Config, error) {
+	resp, err := c.get(ctx, "https://www.speedtest.net/speedtest-config.php")
 	if err != nil {
 		return Config{}, err
 	}

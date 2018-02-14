@@ -14,37 +14,38 @@ type Client http.Client
 
 type response http.Response
 
-func (client *Client) get(ctx context.Context, url string) (resp *response, err error) {
-	htResp, err := ctxhttp.Get(ctx, (*http.Client)(client), url)
+func (c *Client) get(ctx context.Context, url string) (resp *response, err error) {
+	htResp, err := ctxhttp.Get(ctx, (*http.Client)(c), url)
 	return (*response)(htResp), err
 }
 
-func (client *Client) post(ctx context.Context, url string, bodyType string, body io.Reader) (resp *response, err error) {
+func (c *Client) post(ctx context.Context, url string, bodyType string, body io.Reader) (resp *response, err error) {
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return nil, err
 	}
 
 	req.Header.Set("Content-Type", bodyType)
-	htResp, err := ctxhttp.Do(ctx, (*http.Client)(client), req)
+	htResp, err := ctxhttp.Do(ctx, (*http.Client)(c), req)
 
 	return (*response)(htResp), err
 }
 
-func (resp *response) ReadContent() ([]byte, error) {
-	content, err := ioutil.ReadAll(resp.Body)
-	cerr := resp.Body.Close()
-	if err != nil {
+func (res *response) ReadContent() ([]byte, error) {
+	var content []byte
+	if c, err := ioutil.ReadAll(res.Body); err != nil {
 		return nil, err
+	} else {
+		content = c
 	}
-	if cerr != nil {
-		return content, cerr
+	if err := res.Body.Close(); err != nil {
+		return content, err
 	}
 	return content, nil
 }
 
-func (resp *response) ReadXML(out interface{}) error {
-	content, err := resp.ReadContent()
+func (res *response) ReadXML(out interface{}) error {
+	content, err := res.ReadContent()
 	if err != nil {
 		return err
 	}

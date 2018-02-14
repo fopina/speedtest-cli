@@ -13,7 +13,7 @@ func download(client *speedtest.Client, server speedtest.Server) {
 	defer cancel()
 
 	if speed, err := server.ProbeDownloadSpeed(ctx, client); err != nil {
-		log.Fatal("Error probing download speed: %v", err)
+		log.Fatalf("Error probing download speed: %v", err)
 	} else {
 		// Default return speed is in bytes.
 		if *fmtBytes {
@@ -29,7 +29,7 @@ func upload(client *speedtest.Client, server speedtest.Server) {
 	defer cancel()
 
 	if speed, err := server.ProbeUploadSpeed(ctx, client); err != nil {
-		log.Fatal("Error probing upload speed: %v", err)
+		log.Fatalf("Error probing upload speed: %v", err)
 	} else {
 		// Default return speed is in bytes.
 		if *fmtBytes {

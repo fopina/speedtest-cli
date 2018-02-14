@@ -9,7 +9,6 @@ import (
 )
 
 const (
-	maxUploadDuration     = maxDownloadDuration
 	concurrentUploadLimit = concurrentDownloadLimit
 	uploadRepeats         = downloadRepeats * 25
 
@@ -24,17 +23,15 @@ type safeReader struct {
 
 func (r safeReader) Read(p []byte) (n int, err error) {
 	n, err = r.in.Read(p)
-
 	for i := 0; i < n; i++ {
 		p[i] = safeChars[p[i]&31]
 	}
-
 	return n, err
 }
 
 // Will probe upload speed until enough samples are taken or ctx expires.
-func (server *Server) ProbeUploadSpeed(ctx context.Context, client *Client) (BytesPerSecond, error) {
-	pg := newProberGroup(concurrentDownloadLimit)
+func (s Server) ProbeUploadSpeed(ctx context.Context, client *Client) (BytesPerSecond, error) {
+	pg := newProberGroup(concurrentUploadLimit)
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -42,7 +39,7 @@ func (server *Server) ProbeUploadSpeed(ctx context.Context, client *Client) (Byt
 		for i := 0; i < uploadRepeats; i++ {
 			pg.Add(func(size int) func() (bytesTransferred, error) {
 				return func() (bytesTransferred, error) {
-					err := client.uploadFile(ctx, server.URL, size)
+					err := client.uploadFile(ctx, s.URL, size)
 					if err != nil {
 						return bytesTransferred(0), err
 					} else {
@@ -56,7 +53,7 @@ func (server *Server) ProbeUploadSpeed(ctx context.Context, client *Client) (Byt
 	return pg.Collect()
 }
 
-func (client *Client) uploadFile(ctx context.Context, url string, size int) error {
+func (c *Client) uploadFile(ctx context.Context, url string, size int) error {
 	// Check early failure where context is already canceled.
 	select {
 	case <-ctx.Done():
@@ -64,12 +61,12 @@ func (client *Client) uploadFile(ctx context.Context, url string, size int) erro
 	default:
 	}
 
-	res, err := client.post(ctx, url, "application/x-www-form-urlencoded",
+	res, err := c.post(ctx, url, "application/x-www-form-urlencoded",
 		io.MultiReader(
 			strings.NewReader("content1="),
 			io.LimitReader(&safeReader{rand.Reader}, int64(size-9))))
 	if err != nil {
-		return fmt.Errorf("upload failed: %v", url, err)
+		return fmt.Errorf("upload to %q failed: %v", url, err)
 	}
 	defer res.Body.Close()
 
