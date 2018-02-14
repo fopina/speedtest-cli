@@ -49,7 +49,7 @@ var serverURLs = []string{
 	"https://c.speedtest.net/speedtest-servers.php",
 }
 
-func (client *Client) LoadAllServers(ctx context.Context, cfg Config) ([]Server, error) {
+func (client *Client) LoadAllServers(ctx context.Context) ([]Server, error) {
 	grp, ctx := errgroup.WithContext(ctx)
 
 	c := make(chan []Server)

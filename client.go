@@ -3,10 +3,8 @@ package speedtest
 import (
 	"context"
 	"encoding/xml"
-	"fmt"
 	"io"
 	"io/ioutil"
-	"net"
 	"net/http"
 
 	"golang.org/x/net/context/ctxhttp"
@@ -15,25 +13,6 @@ import (
 type Client http.Client
 
 type response http.Response
-
-func NewClient(opts *Opts) (*Client, error) {
-	client := &Client{}
-
-	if len(opts.Interface) != 0 {
-		dialer := &net.Dialer{
-			LocalAddr: &net.IPAddr{IP: net.ParseIP(opts.Interface)},
-		}
-		if dialer.LocalAddr == nil {
-			return nil, fmt.Errorf("Invalid source IP: %s\n", opts.Interface)
-		}
-
-		client.Transport = &http.Transport{
-			Dial: dialer.Dial,
-		}
-	}
-
-	return client, nil
-}
 
 func (client *Client) get(ctx context.Context, url string) (resp *response, err error) {
 	htResp, err := ctxhttp.Get(ctx, (*http.Client)(client), url)
