@@ -1,5 +1,17 @@
 language: go
-
 go_import_path: github.com/jonnrb/speedtest
 go:
  - 1.9
+
+before_install:
+  - go get -t -v ./...
+
+script:
+  - go build ./cmd/speedtest-cli
+  - go test -race -coverprofile=dot.cov -covermode=atomic .
+  - go test -race -coverprofile=geo.cov -covermode=atomic geo
+  - go test -race -coverprofile=prober.cov -covermode=atomic prober
+
+after_success:
+  - cat dot.cov geo.cov prober.cov > coverage.txt
+  - bash <(curl -s https://codecov.io/bash)
