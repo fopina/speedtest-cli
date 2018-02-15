@@ -45,11 +45,11 @@ func (org Coordinates) DistanceTo(dest Coordinates) Kilometers {
 	dlat := (dest.Latitude - org.Latitude).ToRadians()
 	dlon := (dest.Longitude - org.Longitude).ToRadians()
 
-	var a float64 = ((dlat/2).Sin()*(dlat/2).Sin() +
+	a := (dlat/2).Sin()*(dlat/2).Sin() +
 		org.Latitude.ToRadians().Cos()*dest.Latitude.ToRadians().Cos()*
-			(dlon/2).Sin()*(dlon/2).Sin())
+			(dlon/2).Sin()*(dlon/2).Sin()
 
-	var c float64 = 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
+	c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
 
-	return Kilometers(float64(RadiusOfEarth) * c)
+	return RadiusOfEarth * Kilometers(c)
 }

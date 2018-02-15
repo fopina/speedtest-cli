@@ -64,7 +64,7 @@ func (p *Group) Collect() (BytesTransferred, error) {
 				}
 			case lastErr = <-p.Errs:
 			case _ = <-cancel:
-				break
+				return
 			}
 		}
 

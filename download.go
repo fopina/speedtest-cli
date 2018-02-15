@@ -74,18 +74,11 @@ func (c *Client) downloadFile(ctx context.Context, url string) (prober.BytesTran
 	default:
 	}
 
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
 	res, err := c.get(ctx, url)
 	if err != nil {
 		return t, err
 	}
-
-	go func() {
-		<-ctx.Done()
-		res.Body.Close()
-	}()
+	defer res.Body.Close()
 
 	var buf [downloadBufferSize]byte
 	for {

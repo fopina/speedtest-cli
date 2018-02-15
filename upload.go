@@ -19,18 +19,6 @@ const (
 
 var uploadSizes = []int{1000 * 1000 / 4, 1000 * 1000 / 2}
 
-type safeReader struct {
-	in io.Reader
-}
-
-func (r safeReader) Read(p []byte) (n int, err error) {
-	n, err = r.in.Read(p)
-	for i := 0; i < n; i++ {
-		p[i] = safeChars[p[i]&31]
-	}
-	return n, err
-}
-
 // Will probe upload speed until enough samples are taken or ctx expires.
 func (s Server) ProbeUploadSpeed(ctx context.Context, client *Client, stream chan BytesPerSecond) (BytesPerSecond, error) {
 	grp := prober.NewGroup(concurrentUploadLimit)
@@ -55,14 +43,19 @@ func (s Server) ProbeUploadSpeed(ctx context.Context, client *Client, stream cha
 	return speedCollect(grp, stream)
 }
 
-func (c *Client) uploadFile(ctx context.Context, url string, size int) error {
-	// Check early failure where context is already canceled.
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	default:
-	}
+type safeReader struct {
+	in io.Reader
+}
 
+func (r safeReader) Read(p []byte) (n int, err error) {
+	n, err = r.in.Read(p)
+	for i := 0; i < n; i++ {
+		p[i] = safeChars[p[i]&31]
+	}
+	return n, err
+}
+
+func (c *Client) uploadFile(ctx context.Context, url string, size int) error {
 	res, err := c.post(ctx, url, "application/x-www-form-urlencoded",
 		io.MultiReader(
 			strings.NewReader("content1="),
