@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
+
+	"github.com/jonnrb/speedtest/prober"
 )
 
 const (
@@ -15,8 +18,8 @@ const (
 var downloadImageSizes = []int{350, 500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000}
 
 // Will probe download speed until enough samples are taken or ctx expires.
-func (s Server) ProbeDownloadSpeed(ctx context.Context, client *Client) (BytesPerSecond, error) {
-	pg := newProberGroup(concurrentDownloadLimit)
+func (s Server) ProbeDownloadSpeed(ctx context.Context, client *Client, stream chan BytesPerSecond) (BytesPerSecond, error) {
+	grp := prober.NewGroup(concurrentDownloadLimit)
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -27,19 +30,42 @@ func (s Server) ProbeDownloadSpeed(ctx context.Context, client *Client) (BytesPe
 				return 0, fmt.Errorf("error parsing url for %v: %v", s, err)
 			}
 
-			pg.Add(func(url string) func() (bytesTransferred, error) {
-				return func() (bytesTransferred, error) {
+			grp.Add(func(url string) func() (prober.BytesTransferred, error) {
+				return func() (prober.BytesTransferred, error) {
 					return client.downloadFile(ctx, url)
 				}
 			}(url))
 		}
 	}
 
-	return pg.Collect()
+	return speedCollect(grp, stream)
 }
 
-func (c *Client) downloadFile(ctx context.Context, url string) (bytesTransferred, error) {
-	var t bytesTransferred
+func speedCollect(grp *prober.Group, stream chan BytesPerSecond) (BytesPerSecond, error) {
+	start := time.Now()
+
+	if stream != nil {
+		inc := grp.GetIncremental()
+		go func() {
+			for b := range inc {
+				d := float64(time.Since(start)) / float64(time.Second)
+				stream <- BytesPerSecond(float64(b) / d)
+			}
+			close(stream)
+		}()
+	}
+
+	b, err := grp.Collect()
+	if err != nil {
+		return BytesPerSecond(0), err
+	} else {
+		d := float64(time.Since(start)) / float64(time.Second)
+		return BytesPerSecond(float64(b) / d), nil
+	}
+}
+
+func (c *Client) downloadFile(ctx context.Context, url string) (prober.BytesTransferred, error) {
+	var t prober.BytesTransferred
 
 	// Check early failure where context is already canceled.
 	select {
@@ -64,7 +90,7 @@ func (c *Client) downloadFile(ctx context.Context, url string) (bytesTransferred
 	var buf [downloadBufferSize]byte
 	for {
 		read, err := res.Body.Read(buf[:])
-		t += bytesTransferred(read)
+		t += prober.BytesTransferred(read)
 		if err != nil {
 			if err != io.EOF {
 				return t, err

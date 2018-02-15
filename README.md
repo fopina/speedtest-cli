@@ -1,7 +1,7 @@
 # speedtest
 
 Provides a golang interface to the speedtest.net API. Comes with a very basic
-CLI to test your internet speed.
+CLI to test your internet speed (*now with live results*).
 
 ## Example usage
 

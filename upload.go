@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"strings"
+
+	"github.com/jonnrb/speedtest/prober"
 )
 
 const (
@@ -30,27 +32,27 @@ func (r safeReader) Read(p []byte) (n int, err error) {
 }
 
 // Will probe upload speed until enough samples are taken or ctx expires.
-func (s Server) ProbeUploadSpeed(ctx context.Context, client *Client) (BytesPerSecond, error) {
-	pg := newProberGroup(concurrentUploadLimit)
+func (s Server) ProbeUploadSpeed(ctx context.Context, client *Client, stream chan BytesPerSecond) (BytesPerSecond, error) {
+	grp := prober.NewGroup(concurrentUploadLimit)
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	for _, size := range uploadSizes {
 		for i := 0; i < uploadRepeats; i++ {
-			pg.Add(func(size int) func() (bytesTransferred, error) {
-				return func() (bytesTransferred, error) {
+			grp.Add(func(size int) func() (prober.BytesTransferred, error) {
+				return func() (prober.BytesTransferred, error) {
 					err := client.uploadFile(ctx, s.URL, size)
 					if err != nil {
-						return bytesTransferred(0), err
+						return prober.BytesTransferred(0), err
 					} else {
-						return bytesTransferred(size), nil
+						return prober.BytesTransferred(size), nil
 					}
 				}
 			}(size))
 		}
 	}
 
-	return pg.Collect()
+	return speedCollect(grp, stream)
 }
 
 func (c *Client) uploadFile(ctx context.Context, url string, size int) error {
