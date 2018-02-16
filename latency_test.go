@@ -20,11 +20,12 @@ func TestStableSortServersByAverageLatency(t *testing.T) {
 	const (
 		sliceSize = 5
 		runs      = 5
+		timeScale = 10 * time.Millisecond
 	)
 
 	expected := make([]Server, sliceSize)
 	for i := 0; i < sliceSize; i++ {
-		ts := newLatencyTestServer(time.Duration((i+1)*2) * time.Millisecond)
+		ts := newLatencyTestServer(time.Duration(i+1) * timeScale)
 		defer ts.Close()
 		expected[i] = Server{
 			ID:  ServerID(i),
