@@ -1,8 +1,8 @@
 language: go
 go_import_path: github.com/jonnrb/speedtest
 go:
- - 1.9.X
- - tip
+ - 1.9
+ - master
 
 before_install:
   - go get -t -v ./...
