@@ -1,4 +1,4 @@
-# speedtest [![Build Status](https://travis-ci.org/jonnrb/speedtest.svg?branch=master)](https://travis-ci.org/jonnrb/speedtest) [![codecov](https://codecov.io/gh/jonnrb/speedtest/branch/master/graph/badge.svg)](https://codecov.io/gh/jonnrb/speedtest) [![GoDoc](https://godoc.org/github.com/sirupsen/logrus?status.svg)](https://godoc.org/github.com/sirupsen/logrus)
+# speedtest [![Build Status](https://travis-ci.org/jonnrb/speedtest.svg?branch=master)](https://travis-ci.org/jonnrb/speedtest) [![codecov](https://codecov.io/gh/jonnrb/speedtest/branch/master/graph/badge.svg)](https://codecov.io/gh/jonnrb/speedtest) [![GoDoc](https://godoc.org/github.com/jonnrb/speedtest?status.svg)](https://godoc.org/github.com/jonnrb/speedtest)
 
 Provides a golang interface to the speedtest.net API. Comes with a very basic
 CLI to test your internet speed (*now with live results*).
