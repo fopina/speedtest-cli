@@ -85,6 +85,7 @@ func TestGroup_StreamingResults(t *testing.T) {
 		stream = grp.GetIncremental()
 		mu     sync.Mutex
 		done   bool
+		gdone  = make(chan struct{})
 	)
 	go func() {
 		var i BytesTransferred
@@ -105,6 +106,7 @@ func TestGroup_StreamingResults(t *testing.T) {
 				i = b
 			}()
 		}
+		close(gdone)
 	}()
 
 	b, err := grp.Collect()
@@ -122,4 +124,5 @@ func TestGroup_StreamingResults(t *testing.T) {
 		t.Logf("Expected %v bytes transferred but got %v", expected, b)
 		t.Fail()
 	}
+	<-gdone
 }
