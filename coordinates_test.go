@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jonnrb/speedtest/geo"
+	"go.jonnrb.io/speedtest/geo"
 )
 
 func TestSortServersByDistance(t *testing.T) {

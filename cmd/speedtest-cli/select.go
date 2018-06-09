@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/jonnrb/speedtest"
-	"github.com/jonnrb/speedtest/geo"
+	"go.jonnrb.io/speedtest"
+	"go.jonnrb.io/speedtest/geo"
 )
 
 //

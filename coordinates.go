@@ -3,7 +3,7 @@ package speedtest
 import (
 	"sort"
 
-	"github.com/jonnrb/speedtest/geo"
+	"go.jonnrb.io/speedtest/geo"
 )
 
 func SortServersByDistance(servers []Server, org geo.Coordinates) map[ServerID]geo.Kilometers {

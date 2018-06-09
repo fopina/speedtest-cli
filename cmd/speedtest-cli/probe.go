@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/jonnrb/speedtest"
 	"github.com/mattn/go-isatty"
+	"go.jonnrb.io/speedtest"
 )
 
 var outTTY = false

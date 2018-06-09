@@ -1,7 +1,7 @@
-//
-// A super tiny support library for github.com/jonnrb/speedtest that calculates
-// distances (as the crow flies) between surface points on Earth.
-//
+/*
+A super tiny support library for go.jonnrb.io/speedtest that calculates
+distances (as the crow flies) between surface points on Earth.
+*/
 package geo
 
 import (

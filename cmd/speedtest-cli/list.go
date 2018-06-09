@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/jonnrb/speedtest"
+	"go.jonnrb.io/speedtest"
 )
 
 //

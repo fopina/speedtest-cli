@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"sort"
 
-	"github.com/jonnrb/speedtest/geo"
+	"go.jonnrb.io/speedtest/geo"
 	"golang.org/x/sync/errgroup"
 )
 

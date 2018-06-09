@@ -6,7 +6,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/jonnrb/speedtest/prober"
+	"go.jonnrb.io/speedtest/prober"
 )
 
 const (

@@ -3,7 +3,7 @@ package speedtest
 import (
 	"context"
 
-	"github.com/jonnrb/speedtest/geo"
+	"go.jonnrb.io/speedtest/geo"
 )
 
 type Config struct {
