@@ -10,3 +10,10 @@ pipeline:
       - go test ./...
       - go build ./...
 
+  trigger:
+    image: plugins/downstream
+    server: https://drone.jonnrb.com
+    fork: true
+    repositories:
+      - jon/radarsign
+    secrets: [ downstream_token ]
