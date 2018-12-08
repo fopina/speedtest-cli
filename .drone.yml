@@ -12,8 +12,8 @@ steps:
   image: plugins/downstream
   config:
     server: https://drone.jonnrb.com
+    token:
+      from_secret: drone_secret
     fork: true
     repositories:
     - jon/radarsign
-    token:
-      from_secret: downstream_token
