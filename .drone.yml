@@ -10,7 +10,7 @@ steps:
   - go build ./...
 - name: trigger
   image: plugins/downstream
-  config:
+  settings:
     server: https://drone.jonnrb.com
     token:
       from_secret: drone_token
