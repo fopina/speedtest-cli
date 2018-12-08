@@ -13,7 +13,7 @@ steps:
   config:
     server: https://drone.jonnrb.com
     token:
-      from_secret: drone_secret
+      from_secret: drone_token
     fork: true
     repositories:
     - jon/radarsign
