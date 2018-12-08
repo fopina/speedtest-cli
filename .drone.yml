@@ -1,19 +1,23 @@
+kind: pipeline
+name: default
+
 workspace:
   base: /go
   path: src/go.jonnrb.io/speedtest
 
-pipeline:
-  build:
-    image: golang:latest
-    commands:
-      - go get -t ./...
-      - go test ./...
-      - go build ./...
-
-  trigger:
-    image: plugins/downstream
+steps:
+- name: build
+  image: golang:latest
+  commands:
+  - go get -t ./...
+  - go test ./...
+  - go build ./...
+- name: trigger
+  image: plugins/downstream
+  config:
     server: https://drone.jonnrb.com
     fork: true
     repositories:
-      - jon/radarsign
-    secrets: [ downstream_token ]
+    - jon/radarsign
+    token:
+      from_secret: downstream_token
