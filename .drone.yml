@@ -1,5 +1,10 @@
+---
 kind: pipeline
 name: default
+
+platform:
+  os: linux
+  arch: amd64
 
 steps:
 - name: build
@@ -8,12 +13,15 @@ steps:
   - go get -t ./...
   - go test ./...
   - go build ./...
+
 - name: trigger
   image: plugins/downstream
   settings:
-    server: https://drone.jonnrb.com
-    token:
-      from_secret: drone_token
     fork: true
     repositories:
     - jon/radarsign
+    server: https://drone.jonnrb.com
+    token:
+      from_secret: drone_token
+
+...
