@@ -1,10 +1,6 @@
 kind: pipeline
 name: default
 
-workspace:
-  base: /go
-  path: src/go.jonnrb.io/speedtest
-
 steps:
 - name: build
   image: golang:latest
