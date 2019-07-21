@@ -11,39 +11,39 @@ type BytesTransferred int64
 // was transferred), the last error received gets returned.
 //
 type Group struct {
-	Grp  sync.WaitGroup
-	Sem  chan struct{}
-	Inc  chan BytesTransferred
-	Errs chan error
-	Res  chan BytesTransferred
+	grp sync.WaitGroup
+	sem chan struct{}
+	inc chan BytesTransferred
+	err chan error
+	res chan BytesTransferred
 }
 
 func NewGroup(concurrency int) *Group {
 	return &Group{
-		Sem:  make(chan struct{}, concurrency),
-		Errs: make(chan error),
-		Res:  make(chan BytesTransferred),
+		sem: make(chan struct{}, concurrency),
+		err: make(chan error),
+		res: make(chan BytesTransferred),
 	}
 }
 
 func (p *Group) GetIncremental() chan BytesTransferred {
-	if p.Inc == nil {
-		p.Inc = make(chan BytesTransferred)
+	if p.inc == nil {
+		p.inc = make(chan BytesTransferred)
 	}
-	return p.Inc
+	return p.inc
 }
 
 func (p *Group) Add(probe func() (BytesTransferred, error)) {
-	p.Grp.Add(1)
+	p.grp.Add(1)
 	go func() {
-		<-p.Sem
+		<-p.sem
 		b, err := probe()
 		if err != nil {
-			p.Errs <- err
+			p.err <- err
 		}
-		p.Res <- b
-		p.Sem <- struct{}{}
-		p.Grp.Done()
+		p.res <- b
+		p.sem <- struct{}{}
+		p.grp.Done()
 	}()
 }
 
@@ -57,12 +57,12 @@ func (p *Group) Collect() (BytesTransferred, error) {
 	go func() {
 		for {
 			select {
-			case b := <-p.Res:
+			case b := <-p.res:
 				totalSize += b
-				if p.Inc != nil && totalSize != BytesTransferred(0) {
-					p.Inc <- totalSize
+				if p.inc != nil && totalSize != BytesTransferred(0) {
+					p.inc <- totalSize
 				}
-			case lastErr = <-p.Errs:
+			case lastErr = <-p.err:
 			case <-cancel:
 				return
 			}
@@ -70,18 +70,18 @@ func (p *Group) Collect() (BytesTransferred, error) {
 
 	}()
 
-	for i := 0; i < cap(p.Sem); i++ {
-		p.Sem <- struct{}{}
+	for i := 0; i < cap(p.sem); i++ {
+		p.sem <- struct{}{}
 	}
-	p.Grp.Wait()
+	p.grp.Wait()
 	cancel <- struct{}{}
-	for i := 0; i < cap(p.Sem); i++ {
-		<-p.Sem
+	for i := 0; i < cap(p.sem); i++ {
+		<-p.sem
 	}
 
-	if p.Inc != nil {
-		close(p.Inc)
-		p.Inc = nil
+	if p.inc != nil {
+		close(p.inc)
+		p.inc = nil
 	}
 
 	if totalSize != BytesTransferred(0) {
