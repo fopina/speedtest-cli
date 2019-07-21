@@ -20,23 +20,25 @@ const (
 var uploadSizes = []int{1000 * 1000 / 4, 1000 * 1000 / 2}
 
 // Will probe upload speed until enough samples are taken or ctx expires.
-func (s Server) ProbeUploadSpeed(ctx context.Context, client *Client, stream chan BytesPerSecond) (BytesPerSecond, error) {
+func (s Server) ProbeUploadSpeed(
+	ctx context.Context,
+	client *Client,
+	stream chan<- BytesPerSecond,
+) (BytesPerSecond, error) {
 	grp := prober.NewGroup(concurrentUploadLimit)
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	for _, size := range uploadSizes {
-		for i := 0; i < uploadRepeats; i++ {
-			grp.Add(func(size int) func() (prober.BytesTransferred, error) {
-				return func() (prober.BytesTransferred, error) {
-					err := client.uploadFile(ctx, s.URL, size)
-					if err != nil {
-						return prober.BytesTransferred(0), err
-					} else {
-						return prober.BytesTransferred(size), nil
-					}
+	for i := range uploadSizes {
+		for j := 0; j < uploadRepeats; j++ {
+			size := uploadSizes[i]
+			grp.Add(func() (t prober.BytesTransferred, err error) {
+				err = client.uploadFile(ctx, s.URL, size)
+				if err == nil {
+					t = prober.BytesTransferred(size)
 				}
-			}(size))
+				return
+			})
 		}
 	}
 
@@ -50,12 +52,16 @@ type safeReader struct {
 func (r safeReader) Read(p []byte) (n int, err error) {
 	n, err = r.in.Read(p)
 	for i := 0; i < n; i++ {
-		p[i] = safeChars[p[i]&31]
+		p[i] = safeChars[int(p[i])%len(safeChars)]
 	}
 	return n, err
 }
 
-func (c *Client) uploadFile(ctx context.Context, url string, size int) error {
+func (c *Client) uploadFile(
+	ctx context.Context,
+	url string,
+	size int,
+) error {
 	res, err := c.post(ctx, url, "application/x-www-form-urlencoded",
 		io.MultiReader(
 			strings.NewReader("content1="),
