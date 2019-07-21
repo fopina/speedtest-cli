@@ -71,8 +71,8 @@ func selectServer(client *speedtest.Client, cfg speedtest.Config, servers []spee
 		distance = distanceMap[server.ID]
 	}
 
-	fmt.Printf("Using server hosted by %s (%s) [%v]: %.1f ms\n",
-		server.Sponsor, server.Name, distance, float64(latency)/float64(time.Millisecond))
+	fmt.Printf("Using server %d hosted by %s (%s) [%v]: %.1f ms\n",
+		server.ID, server.Sponsor, server.Name, distance, float64(latency)/float64(time.Millisecond))
 
 	return server
 }
