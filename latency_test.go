@@ -12,7 +12,9 @@ import (
 func newLatencyTestServer(latency time.Duration) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(latency)
-		w.Write([]byte("test=test"))
+		if _, err := w.Write([]byte("test=test")); err != nil {
+			panic(err)
+		}
 	}))
 }
 

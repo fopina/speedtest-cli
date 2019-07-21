@@ -63,7 +63,7 @@ func (p *Group) Collect() (BytesTransferred, error) {
 					p.Inc <- totalSize
 				}
 			case lastErr = <-p.Errs:
-			case _ = <-cancel:
+			case <-cancel:
 				return
 			}
 		}
