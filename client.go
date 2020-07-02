@@ -1,6 +1,7 @@
 package speedtest
 
 import (
+	"bytes"
 	"context"
 	"encoding/xml"
 	"io"
@@ -20,12 +21,19 @@ func (c *Client) get(ctx context.Context, url string) (resp *response, err error
 }
 
 func (c *Client) post(ctx context.Context, url string, bodyType string, body io.Reader) (resp *response, err error) {
-	req, err := http.NewRequest("POST", url, body)
+	buf := bytes.Buffer{}
+	_, err = io.Copy(&buf, body)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", url, &buf)
 	if err != nil {
 		return nil, err
 	}
 
 	req.Header.Set("Content-Type", bodyType)
+	req.ContentLength = int64(buf.Len())
 	htResp, err := ctxhttp.Do(ctx, (*http.Client)(c), req)
 
 	return (*response)(htResp), err
