@@ -1,5 +1,7 @@
 module go.jonnrb.io/speedtest
 
+go 1.14
+
 require (
 	github.com/fortytw2/leaktest v1.3.0
 	github.com/mattn/go-isatty v0.0.4
