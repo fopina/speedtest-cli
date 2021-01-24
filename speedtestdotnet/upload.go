@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"go.jonnrb.io/speedtest/prober"
+	"go.jonnrb.io/speedtest/units"
 )
 
 const (
@@ -23,8 +24,8 @@ var uploadSizes = []int{1000 * 1000 / 4, 1000 * 1000 / 2}
 func (s Server) ProbeUploadSpeed(
 	ctx context.Context,
 	client *Client,
-	stream chan<- BytesPerSecond,
-) (BytesPerSecond, error) {
+	stream chan<- units.BytesPerSecond,
+) (units.BytesPerSecond, error) {
 	grp := prober.NewGroup(concurrentUploadLimit)
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()

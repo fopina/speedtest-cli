@@ -1,36 +1,60 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
-	"log"
+	"os"
+	"strings"
 
-	"go.jonnrb.io/speedtest/speedtestdotnet"
+	"go.jonnrb.io/speedtest/cmd/speedtest-cli/internal/speedtestdotnet"
 )
 
+type subcmd struct {
+	mainFunc func(args []string)
+	aliases  []string
+}
+
+var subcmds = []subcmd{
+	subcmd{
+		mainFunc: speedtestdotnet.Main,
+		aliases:  []string{"stdn", "speedtestdotnet"},
+	},
+}
+
 func main() {
+	flag.Usage = usage
 	flag.Parse()
 
-	var client speedtestdotnet.Client
-
-	if *list {
-		printServers(&client)
-		return
+	s := getSubcmd()
+	if s == nil {
+		flag.Usage()
+		os.Exit(2)
 	}
+	s.mainFunc(flag.Args())
+}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *cfgTime)
-	defer cancel()
-
-	cfg, err := client.Config(ctx)
-	if err != nil {
-		log.Fatalf("Error loading speedtest.net configuration: %v", err)
+func getSubcmd() *subcmd {
+	args := flag.Args()
+	if len(args) < 1 {
+		return nil
 	}
-	fmt.Printf("Testing from %s (%s)...\n", cfg.ISP, cfg.IP)
-	servers := listServers(ctx, &client)
+	for _, s := range subcmds {
+		for _, a := range s.aliases {
+			if a == args[0] {
+				return &s
+			}
+		}
+	}
+	return nil
+}
 
-	server := selectServer(&client, cfg, servers)
-
-	download(&client, server)
-	upload(&client, server)
+func usage() {
+	fmt.Fprintf(flag.CommandLine.Output(), "USAGE\n")
+	for _, s := range subcmds {
+		fmt.Fprintf(
+			flag.CommandLine.Output(),
+			"  %s %s [OPTIONS]\n",
+			os.Args[0], strings.Join(s.aliases, "|"))
+	}
+	flag.PrintDefaults()
 }

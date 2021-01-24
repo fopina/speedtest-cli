@@ -1,4 +1,4 @@
-package main
+package speedtestdotnet
 
 import (
 	"context"
@@ -10,7 +10,6 @@ import (
 	"go.jonnrb.io/speedtest/speedtestdotnet"
 )
 
-//
 // Selects a server to use, either selected by the user or by a low latency
 // selection algorithm.
 //

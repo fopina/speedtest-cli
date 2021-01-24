@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"go.jonnrb.io/speedtest/prober"
+	"go.jonnrb.io/speedtest/units"
 )
 
 const (
@@ -21,8 +22,8 @@ var downloadImageSizes = []int{350, 500, 750, 1000, 1500, 2000, 2500, 3000, 3500
 func (s Server) ProbeDownloadSpeed(
 	ctx context.Context,
 	client *Client,
-	stream chan<- BytesPerSecond,
-) (BytesPerSecond, error) {
+	stream chan<- units.BytesPerSecond,
+) (units.BytesPerSecond, error) {
 	grp := prober.NewGroup(concurrentDownloadLimit)
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -46,8 +47,8 @@ func (s Server) ProbeDownloadSpeed(
 
 func speedCollect(
 	grp *prober.Group,
-	stream chan<- BytesPerSecond,
-) (BytesPerSecond, error) {
+	stream chan<- units.BytesPerSecond,
+) (units.BytesPerSecond, error) {
 	start := time.Now()
 
 	if stream != nil {
@@ -55,7 +56,7 @@ func speedCollect(
 		go func() {
 			for b := range inc {
 				d := float64(time.Since(start)) / float64(time.Second)
-				stream <- BytesPerSecond(float64(b) / d)
+				stream <- units.BytesPerSecond(float64(b) / d)
 			}
 			close(stream)
 		}()
@@ -63,10 +64,10 @@ func speedCollect(
 
 	b, err := grp.Collect()
 	if err != nil {
-		return BytesPerSecond(0), err
+		return units.BytesPerSecond(0), err
 	} else {
 		d := float64(time.Since(start)) / float64(time.Second)
-		return BytesPerSecond(float64(b) / d), nil
+		return units.BytesPerSecond(float64(b) / d), nil
 	}
 }
 

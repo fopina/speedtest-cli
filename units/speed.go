@@ -1,4 +1,4 @@
-package speedtestdotnet
+package units
 
 import (
 	"fmt"
