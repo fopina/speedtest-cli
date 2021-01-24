@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"go.jonnrb.io/speedtest"
+	"go.jonnrb.io/speedtest/speedtestdotnet"
 )
 
 var (
@@ -25,7 +25,7 @@ func init() {
 	flag.Var(&srvBlk, "server_blocklist", "CSV of server IDs to ignore")
 }
 
-type serverIDList []speedtest.ServerID
+type serverIDList []speedtestdotnet.ServerID
 
 func (l *serverIDList) Set(s string) (err error) {
 	sl := strings.Split(s, ",")
@@ -33,7 +33,7 @@ func (l *serverIDList) Set(s string) (err error) {
 	for i, s := range sl {
 		var n int
 		n, err = strconv.Atoi(s)
-		(*l)[i] = speedtest.ServerID(n)
+		(*l)[i] = speedtestdotnet.ServerID(n)
 		if err != nil {
 			return
 		}

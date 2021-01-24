@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/mattn/go-isatty"
-	"go.jonnrb.io/speedtest"
+	"go.jonnrb.io/speedtest/speedtestdotnet"
 )
 
 var outTTY = false
@@ -21,11 +21,11 @@ func erasePrevious() {
 	fmt.Print("\033[K")  // ANSI escape sequence for erase current line
 }
 
-func download(client *speedtest.Client, server speedtest.Server) {
+func download(client *speedtestdotnet.Client, server speedtestdotnet.Server) {
 	ctx, cancel := context.WithTimeout(context.Background(), *dlTime)
 	defer cancel()
 
-	printSpeed := func(speed speedtest.BytesPerSecond) {
+	printSpeed := func(speed speedtestdotnet.BytesPerSecond) {
 		// Default return speed is in bytes.
 		if *fmtBytes {
 			fmt.Printf("Download speed: %v\n", speed)
@@ -34,10 +34,10 @@ func download(client *speedtest.Client, server speedtest.Server) {
 		}
 	}
 
-	var stream chan speedtest.BytesPerSecond
+	var stream chan speedtestdotnet.BytesPerSecond
 	done := make(chan struct{})
 	if outTTY {
-		stream = make(chan speedtest.BytesPerSecond)
+		stream = make(chan speedtestdotnet.BytesPerSecond)
 		go func() {
 			for speed := range stream {
 				erasePrevious()
@@ -48,7 +48,7 @@ func download(client *speedtest.Client, server speedtest.Server) {
 	}
 
 	if outTTY {
-		printSpeed(speedtest.BytesPerSecond(0))
+		printSpeed(speedtestdotnet.BytesPerSecond(0))
 	}
 	if speed, err := server.ProbeDownloadSpeed(ctx, client, stream); err != nil {
 		log.Fatalf("Error probing download speed: %v", err)
@@ -61,11 +61,11 @@ func download(client *speedtest.Client, server speedtest.Server) {
 	}
 }
 
-func upload(client *speedtest.Client, server speedtest.Server) {
+func upload(client *speedtestdotnet.Client, server speedtestdotnet.Server) {
 	ctx, cancel := context.WithTimeout(context.Background(), *ulTime)
 	defer cancel()
 
-	printSpeed := func(speed speedtest.BytesPerSecond) {
+	printSpeed := func(speed speedtestdotnet.BytesPerSecond) {
 		// Default return speed is in bytes.
 		if *fmtBytes {
 			fmt.Printf("Upload speed: %v\n", speed)
@@ -74,10 +74,10 @@ func upload(client *speedtest.Client, server speedtest.Server) {
 		}
 	}
 
-	var stream chan speedtest.BytesPerSecond
+	var stream chan speedtestdotnet.BytesPerSecond
 	done := make(chan struct{})
 	if outTTY {
-		stream = make(chan speedtest.BytesPerSecond)
+		stream = make(chan speedtestdotnet.BytesPerSecond)
 		go func() {
 			for speed := range stream {
 				erasePrevious()
@@ -88,7 +88,7 @@ func upload(client *speedtest.Client, server speedtest.Server) {
 	}
 
 	if outTTY {
-		printSpeed(speedtest.BytesPerSecond(0))
+		printSpeed(speedtestdotnet.BytesPerSecond(0))
 	}
 	if speed, err := server.ProbeUploadSpeed(ctx, client, stream); err != nil {
 		log.Fatalf("Error probing upload speed: %v", err)

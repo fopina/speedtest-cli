@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"log"
 
-	"go.jonnrb.io/speedtest"
+	"go.jonnrb.io/speedtest/speedtestdotnet"
 )
 
 // Loads the list of servers and exits the program on failure.
 //
 func listServers(
 	ctx context.Context,
-	client *speedtest.Client,
-) []speedtest.Server {
+	client *speedtestdotnet.Client,
+) []speedtestdotnet.Server {
 	servers, err := client.LoadAllServers(ctx)
 	if err != nil {
 		log.Fatalf("Failed to load server list: %v\n", err)
@@ -27,8 +27,8 @@ func listServers(
 	return servers
 }
 
-func pruneBlockedServers(servers []speedtest.Server) []speedtest.Server {
-	n := make([]speedtest.Server, len(servers)-len(srvBlk))[:0]
+func pruneBlockedServers(servers []speedtestdotnet.Server) []speedtestdotnet.Server {
+	n := make([]speedtestdotnet.Server, len(servers)-len(srvBlk))[:0]
 	for _, s := range servers {
 		var i bool
 		for _, b := range srvBlk {
@@ -45,7 +45,7 @@ func pruneBlockedServers(servers []speedtest.Server) []speedtest.Server {
 
 // Iterates through the list of server and prints them out.
 //
-func printServers(client *speedtest.Client) {
+func printServers(client *speedtestdotnet.Client) {
 	ctx, cancel := context.WithTimeout(context.Background(), *cfgTime)
 	defer cancel()
 

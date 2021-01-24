@@ -1,4 +1,4 @@
-package speedtest
+package speedtestdotnet
 
 import (
 	"context"

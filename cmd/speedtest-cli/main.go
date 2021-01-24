@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"log"
 
-	"go.jonnrb.io/speedtest"
+	"go.jonnrb.io/speedtest/speedtestdotnet"
 )
 
 func main() {
 	flag.Parse()
 
-	var client speedtest.Client
+	var client speedtestdotnet.Client
 
 	if *list {
 		printServers(&client)
