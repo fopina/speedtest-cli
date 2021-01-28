@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"go.jonnrb.io/speedtest/prober"
+	"go.jonnrb.io/speedtest/prober/proberutil"
 	"go.jonnrb.io/speedtest/units"
 )
 
@@ -43,7 +44,7 @@ func (s Server) ProbeUploadSpeed(
 		}
 	}
 
-	return speedCollect(grp, stream)
+	return proberutil.SpeedCollect(grp, stream)
 }
 
 type safeReader struct {
