@@ -1,4 +1,4 @@
-package fastdotcom
+package internal
 
 import "testing"
 

@@ -1,4 +1,4 @@
-package fastdotcom
+package internal
 
 import (
 	"context"
@@ -73,7 +73,7 @@ func makeManifestURL(token string, urls int) string {
 		panic(err)
 	}
 
-	q := new(url.Values)
+	q := make(url.Values)
 	q.Set("https", "true")
 	q.Set("token", token)
 	q.Set("urlCount", strconv.Itoa(urls))

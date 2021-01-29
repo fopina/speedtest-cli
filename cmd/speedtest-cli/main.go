@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"go.jonnrb.io/speedtest/cmd/speedtest-cli/internal/fastdotcom"
 	"go.jonnrb.io/speedtest/cmd/speedtest-cli/internal/speedtestdotnet"
 )
 
@@ -18,6 +19,10 @@ var subcmds = []subcmd{
 	subcmd{
 		mainFunc: speedtestdotnet.Main,
 		aliases:  []string{"stdn", "speedtestdotnet"},
+	},
+	subcmd{
+		mainFunc: fastdotcom.Main,
+		aliases:  []string{"fdc", "fastdotcom"},
 	},
 }
 
