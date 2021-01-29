@@ -68,7 +68,7 @@ func (c *Client) downloadFile(
 		return
 	}
 
-	res, err := c.emptyPost(ctx, url)
+	res, err := c.get(ctx, url)
 	if err != nil {
 		return t, err
 	}

@@ -10,7 +10,7 @@ type Client http.Client
 
 type response http.Response
 
-func (c *Client) emptyPost(ctx context.Context, url string) (*response, error) {
+func (c *Client) get(ctx context.Context, url string) (*response, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("fastdotcom: could not create request to %q: %w", url, err)
