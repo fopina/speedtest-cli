@@ -18,8 +18,9 @@ const (
 )
 
 var downloadSizes = []int{
-	256, 512, 1024, 2048, 4096,
-	131072, 1048576, 4194304, 8388608, 16777216}
+	256, 1024, 4096,
+	131_072, 1_048_576, 8_388_608, 16_777_216,
+	33_554_432}
 
 // Will probe download speed until enough samples are taken or ctx expires.
 func (m *Manifest) ProbeDownloadSpeed(
