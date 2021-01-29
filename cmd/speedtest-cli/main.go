@@ -18,11 +18,11 @@ type subcmd struct {
 var subcmds = []subcmd{
 	subcmd{
 		mainFunc: speedtestdotnet.Main,
-		aliases:  []string{"stdn", "speedtestdotnet"},
+		aliases:  []string{"st", "speedtest.net"},
 	},
 	subcmd{
 		mainFunc: fastdotcom.Main,
-		aliases:  []string{"fdc", "fastdotcom"},
+		aliases:  []string{"f", "fast.com"},
 	},
 }
 
