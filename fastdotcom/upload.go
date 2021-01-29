@@ -2,7 +2,7 @@ package fastdotcom
 
 import (
 	"context"
-	"io"
+	"io/ioutil"
 
 	"go.jonnrb.io/speedtest/prober"
 	"go.jonnrb.io/speedtest/prober/proberutil"
@@ -10,32 +10,32 @@ import (
 )
 
 const (
-	concurrentDownloadLimit = 12
-	downloadBufferSize      = 4096
-	downloadRepeats         = 5
+	concurrentUploadLimit = 8
+	uploadRepeats         = 3
 )
 
-var downloadSizes = []int{
+var uploadSizes = []int{
 	256, 1024, 4096,
 	131_072, 1_048_576, 8_388_608, 16_777_216,
 	33_554_432}
 
-// Will probe download speed until enough samples are taken or ctx expires.
-func (m *Manifest) ProbeDownloadSpeed(
+// Will probe upload speed until enough samples are taken or ctx expires.
+func (m *Manifest) ProbeUploadSpeed(
 	ctx context.Context,
 	client *Client,
 	stream chan<- units.BytesPerSecond,
 ) (units.BytesPerSecond, error) {
-	grp := prober.NewGroup(concurrentDownloadLimit)
+	grp := prober.NewGroup(concurrentUploadLimit)
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	for _, size := range downloadSizes {
-		for i := 0; i < downloadRepeats; i++ {
+	for i := range uploadSizes {
+		for j := 0; j < uploadRepeats; j++ {
 			for _, t := range m.m.Targets {
+				size := uploadSizes[i]
 				url := putSizeIntoURL(t.URL, size)
 				grp.Add(func() (prober.BytesTransferred, error) {
-					return client.downloadFile(ctx, url)
+					return client.uploadFile(ctx, url, size)
 				})
 			}
 		}
@@ -44,31 +44,23 @@ func (m *Manifest) ProbeDownloadSpeed(
 	return proberutil.SpeedCollect(grp, stream)
 }
 
-func (c *Client) downloadFile(
+func (c *Client) uploadFile(
 	ctx context.Context,
 	url string,
+	size int,
 ) (t prober.BytesTransferred, err error) {
 	// Check early failure where context is already canceled.
 	if err = ctx.Err(); err != nil {
 		return
 	}
 
-	res, err := c.get(ctx, url)
+	res, err := c.post(ctx, url, size)
 	if err != nil {
 		return t, err
 	}
 	defer res.Body.Close()
-
-	var buf [downloadBufferSize]byte
-	for {
-		read, err := res.Body.Read(buf[:])
-		t += prober.BytesTransferred(read)
-		if err != nil {
-			if err != io.EOF {
-				return t, err
-			}
-			break
-		}
+	if _, err = ioutil.ReadAll(res.Body); err != nil {
+		return prober.BytesTransferred(0), err
 	}
-	return t, nil
+	return prober.BytesTransferred(size), nil
 }

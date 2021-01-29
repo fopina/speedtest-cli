@@ -26,6 +26,21 @@ func download(m *fastdotcom.Manifest, client *fastdotcom.Client) {
 	finalize(speed)
 }
 
+func upload(m *fastdotcom.Manifest, client *fastdotcom.Client) {
+	ctx, cancel := context.WithTimeout(context.Background(), *ulTime)
+	defer cancel()
+
+	stream, finalize := proberPrinter(func(s units.BytesPerSecond) string {
+		return formatSpeed("Upload speed", s)
+	})
+	speed, err := m.ProbeUploadSpeed(ctx, client, stream)
+	if err != nil {
+		log.Fatalf("Error probing upload speed: %v", err)
+		return
+	}
+	finalize(speed)
+}
+
 func proberPrinter(format func(units.BytesPerSecond) string) (
 	stream chan units.BytesPerSecond,
 	finalize func(units.BytesPerSecond),

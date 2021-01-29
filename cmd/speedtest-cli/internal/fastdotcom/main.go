@@ -24,4 +24,5 @@ func Main(args []string) {
 	}
 
 	download(m, &client)
+	upload(m, &client)
 }
