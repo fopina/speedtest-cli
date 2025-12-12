@@ -1,0 +1,35 @@
+name: 🚀 publish
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+
+  goreleaser:
+    name: publish
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: ./.github/actions/release
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Show summary
+        run: |
+          echo 'Published:  ' >> ${GITHUB_STEP_SUMMARY}
+          echo '* `ghcr.io/${{ github.repository }}:${{ github.ref_name }}`' >> ${GITHUB_STEP_SUMMARY}
+          echo '* `ghcr.io/${{ github.repository }}:latest`' >> ${GITHUB_STEP_SUMMARY}

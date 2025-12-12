@@ -1,0 +1,65 @@
+name: 👷 publish dev
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+
+  goreleaser:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: ./.github/actions/release
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flags: --snapshot
+
+      - name: Upload assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries
+          path: |
+            dist/**/*.zip
+            dist/**/*.tar.gz
+
+      - name: Sanitize branch name
+        id: sanitize_branch
+        run: |
+          SANITIZED_BRANCH=$(echo -n "${{ github.ref_name }}" | tr '/' '-' | tr -c '[:alnum:]-' '-')
+          echo sanitized_branch=$SANITIZED_BRANCH >> $GITHUB_OUTPUT
+
+      - name: Re-tag and push arch images
+        if: startsWith(github.head_ref, 'dev/')
+        # TODO: is this the list of images to be added to manifest? tag version and architectures?
+        run: |
+          docker tag ghcr.io/${{ github.repository }}:v0.0.0-arm64 \
+                    ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-arm64
+          docker push ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-arm64
+          docker tag ghcr.io/${{ github.repository }}:v0.0.0-amd64 \
+                    ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-amd64
+          docker push ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-amd64
+
+      - name: Create and push manifest for branch tag
+        if: startsWith(github.head_ref, 'dev/')
+        run: |
+          docker manifest create ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }} \
+                                 ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-arm64 \
+                                 ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-amd64
+          docker manifest push ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}
+
+      - name: Show summary
+        if: startsWith(github.head_ref, 'dev/')
+        run: |
+          echo 'Published:  ' >> ${GITHUB_STEP_SUMMARY}
+          echo '* `ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}`' >> ${GITHUB_STEP_SUMMARY}
