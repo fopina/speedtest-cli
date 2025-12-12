@@ -42,13 +42,13 @@ jobs:
       - name: Re-tag and push arch images
         if: startsWith(github.head_ref, 'dev/')
         run: |
-          docker tag ghcr.io/${{ github.repository }}:v0.0.0-arm64 \
+          docker tag ghcr.io/${{ github.repository }}:latest-arm64 \
                     ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-arm64
           docker push ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-arm64
-          docker tag ghcr.io/${{ github.repository }}:v0.0.0-amd64 \
+          docker tag ghcr.io/${{ github.repository }}:latest-amd64 \
                     ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-amd64
           docker push ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-amd64
-          docker tag ghcr.io/${{ github.repository }}:v0.0.0-arm7 \
+          docker tag ghcr.io/${{ github.repository }}:latest-arm7 \
                     ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-arm7
           docker push ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-arm7
 
