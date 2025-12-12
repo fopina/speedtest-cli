@@ -1,0 +1,105 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: linux-arm7
+    env:
+      - CGO_ENABLED=0
+    ldflags: -s -w -X main.version={{ .Version }}
+    goos:
+      - linux
+    goarch:
+      - arm
+    goarm:
+      - '7'
+  - id: cross
+    env:
+      - CGO_ENABLED=0
+    ldflags: -s -w -X main.version={{ .Version }}
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    # use zip for windows archives
+    format_overrides:
+      - goos: windows
+        format: zip
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
+dockers:
+- image_templates:
+  - 'ghcr.io/fopina/{{.ProjectName}}:{{ .Tag }}-amd64'
+  dockerfile: Dockerfile
+  use: buildx
+  build_flag_templates:
+  - "--pull"
+  - "--label=io.artifacthub.package.license=MIT"
+  - "--label=org.opencontainers.image.created={{.Date}}"
+  - "--label=org.opencontainers.image.name={{.ProjectName}}"
+  - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+  - "--label=org.opencontainers.image.version={{.Version}}"
+  - "--label=org.opencontainers.image.source={{.GitURL}}"
+  - "--platform=linux/amd64"
+- image_templates:
+  - 'ghcr.io/fopina/{{.ProjectName}}:{{ .Tag }}-arm64'
+  dockerfile:  Dockerfile
+  use: buildx
+  build_flag_templates:
+  - "--pull"
+  - "--label=io.artifacthub.package.license=MIT"
+  - "--label=org.opencontainers.image.created={{.Date}}"
+  - "--label=org.opencontainers.image.name={{.ProjectName}}"
+  - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+  - "--label=org.opencontainers.image.version={{.Version}}"
+  - "--label=org.opencontainers.image.source={{.GitURL}}"
+  - "--platform=linux/arm64"
+  goarch: arm64
+- image_templates:
+  - 'ghcr.io/fopina/{{.ProjectName}}:{{ .Tag }}-armv7'
+  dockerfile:  Dockerfile
+  use: buildx
+  build_flag_templates:
+  - "--pull"
+  - "--label=io.artifacthub.package.license=MIT"
+  - "--label=org.opencontainers.image.created={{.Date}}"
+  - "--label=org.opencontainers.image.name={{.ProjectName}}"
+  - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+  - "--label=org.opencontainers.image.version={{.Version}}"
+  - "--label=org.opencontainers.image.source={{.GitURL}}"
+  - "--platform=linux/arm/v7"
+  goarch: arm
+  goarm: '7'
+
+docker_manifests:
+- name_template: 'ghcr.io/fopina/{{.ProjectName}}:{{ .Tag }}'
+  image_templates:
+  - 'ghcr.io/fopina/{{.ProjectName}}:{{ .Tag }}-amd64'
+  - 'ghcr.io/fopina/{{.ProjectName}}:{{ .Tag }}-arm64'
+  - 'ghcr.io/fopina/{{.ProjectName}}:{{ .Tag }}-armv7'
+- name_template: 'ghcr.io/fopina/{{.ProjectName}}:latest'
+  image_templates:
+  - 'ghcr.io/fopina/{{.ProjectName}}:{{ .Tag }}-amd64'
+  - 'ghcr.io/fopina/{{.ProjectName}}:{{ .Tag }}-arm64'
+  - 'ghcr.io/fopina/{{.ProjectName}}:{{ .Tag }}-armv7'

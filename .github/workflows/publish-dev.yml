@@ -41,7 +41,6 @@ jobs:
 
       - name: Re-tag and push arch images
         if: startsWith(github.head_ref, 'dev/')
-        # TODO: is this the list of images to be added to manifest? tag version and architectures?
         run: |
           docker tag ghcr.io/${{ github.repository }}:v0.0.0-arm64 \
                     ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-arm64
@@ -49,12 +48,16 @@ jobs:
           docker tag ghcr.io/${{ github.repository }}:v0.0.0-amd64 \
                     ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-amd64
           docker push ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-amd64
+          docker tag ghcr.io/${{ github.repository }}:v0.0.0-arm7 \
+                    ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-arm7
+          docker push ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-arm7
 
       - name: Create and push manifest for branch tag
         if: startsWith(github.head_ref, 'dev/')
         run: |
           docker manifest create ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }} \
                                  ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-arm64 \
+                                 ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-arm7 \
                                  ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-amd64
           docker manifest push ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}
 
