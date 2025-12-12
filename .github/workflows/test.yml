@@ -1,0 +1,34 @@
+name: 🧪 tests
+
+on:
+  push:
+    branches:
+      # just for coverage on main branch - PRs are covered by publish-dev
+      - main
+  workflow_call:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 1.21
+
+      - name: go mod tidy
+        run: go mod tidy
+
+      - name: Run coverage
+        run: go test -race -coverprofile="coverage.out" -covermode=atomic ./...
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          flags: unittests
+          # TODO: tokenless only works if Codecov app is installed (in the account or org) and set up in settings - https://app.codecov.io/account/gh/fopina/org-upload-token "Token authentication" -> "Not Required"
+          # token: ${{ secrets.CODECOV_TOKEN }}
+          # TODO: slug is required if using GLOBAL token inside an *org* - never applies to personal repositories
+          # slug: ${{ github.repository }}
