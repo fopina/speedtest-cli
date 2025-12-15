@@ -61,7 +61,7 @@ func extractJSPath(html string) string {
 func getJS(ctx context.Context, jsPath string) (string, error) {
 	u, err := url.Parse("https://fast.com")
 	if err != nil {
-		return "", fmt.Errorf("fastdotcom: impossible to parse fast.com URL: %w", err) // replace panic with error
+		return "", fmt.Errorf("fastdotcom: impossible to parse fast.com URL: %w", err)
 	}
 	u.Path = jsPath
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
