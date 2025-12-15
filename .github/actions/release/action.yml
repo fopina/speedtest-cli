@@ -6,7 +6,11 @@ inputs:
     default: ''
   github-token:
     description: 'Token to login to GHCR and pull image - steps skipped if not provided'
-    default: ''  
+    default: ''
+outputs:
+  version:
+    description: "Released version"
+    value: ${{ steps.get_version.outputs.version }}
 runs:
   using: "composite"
   steps:
@@ -28,10 +32,24 @@ runs:
         username: ${{ github.actor }}
         password: ${{ inputs.github-token }}
 
+
     - name: Run GoReleaser
+      id: goreleaser
       uses: goreleaser/goreleaser-action@v6
       with:
         version: '~> v2'
         args: release --clean ${{ inputs.flags }}
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
+
+    - name: Print released version
+      id: get_version
+      shell: bash
+      run: |
+        if [ "${{ steps.goreleaser.outputs.metadata }}" ]; then
+          VERSION=$(jq -r '.version' <<< '${{ steps.goreleaser.outputs.metadata }}')
+          echo "Released version: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+        else
+          echo "No release metadata available"
+        fi

@@ -21,6 +21,7 @@ jobs:
         uses: actions/checkout@v4
 
       - uses: ./.github/actions/release
+        id: release
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flags: --snapshot
@@ -65,5 +66,6 @@ jobs:
       - name: Show summary
         if: startsWith(github.head_ref, 'dev/')
         run: |
+          echo 'Snapshot: ${{ steps.release.outputs.version }}  ' >> ${GITHUB_STEP_SUMMARY}
           echo 'Published:  ' >> ${GITHUB_STEP_SUMMARY}
           echo '* `ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}`' >> ${GITHUB_STEP_SUMMARY}
