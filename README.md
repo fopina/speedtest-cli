@@ -1,5 +1,4 @@
-speedtest.net CLI
-=================
+# speedtest.net CLI
 
 [![goreference](https://pkg.go.dev/badge/github.com/fopina/speedtest-cli.svg)](https://pkg.go.dev/github.com/fopina/speedtest-cli)
 [![release](https://img.shields.io/github/v/release/fopina/speedtest-cli)](https://github.com/fopina/speedtest-cli/releases)
@@ -9,16 +8,13 @@ speedtest.net CLI
 [![codecov](https://codecov.io/github/fopina/speedtest-cli/graph/badge.svg)](https://codecov.io/github/fopina/speedtest-cli)
 [![Go Report Card](https://goreportcard.com/badge/github.com/fopina/speedtest-cli)](https://goreportcard.com/report/github.com/fopina/speedtest-cli)
 
-> Forked from [surol/speedtest-cli](https://github.com/surol/speedtest-cli).  
+> Forked from [surol/speedtest-cli](https://github.com/surol/speedtest-cli). Huge changes also merged from [jonnrb/speedtest](https://github.com/jonnrb/speedtest).  
 > Detached as it has been archived and no longer makes sense to have it as default PR target  
 > *Github, please fix this to allow fork network to be kept without that bad UX*
 
 This is a simple command line client to speedtest.net written in Go.
 
-It is a direct port from https://github.com/sivel/speedtest-cli written in Python. It lacks some of the features though, e.g. `-mini` and `-share` options are not supported.
-
-Installation
-------------
+## Installation
 
 Dowload a pre-built binary from [releases](https://github.com/fopina/speedtest-cli/releases) such as:
 
@@ -34,8 +30,7 @@ go get github.com/fopina/speedtest-cli
 go install github.com/fopina/speedtest-cli
 ```
 
-Usage
------
+## Usage
 
 Without any arguments `speedtest-cli` tests the speed against the closest server with the lowest latency.
 
