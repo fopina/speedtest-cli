@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -31,8 +32,8 @@ jobs:
         with:
           name: binaries
           path: |
-            dist/**/*.zip
-            dist/**/*.tar.gz
+            dist/**/speedtest-cli
+            dist/**/speedtest-cli.exe
           if-no-files-found: error
 
       - name: Sanitize branch name
@@ -42,7 +43,7 @@ jobs:
           echo sanitized_branch=$SANITIZED_BRANCH >> $GITHUB_OUTPUT
 
       - name: Re-tag and push arch images
-        if: startsWith(github.head_ref, 'dev/')
+        if: startsWith(github.head_ref, 'dev/') || github.event_name == 'workflow_dispatch'
         run: |
           docker tag ghcr.io/${{ github.repository }}:latest-arm64 \
                     ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-arm64
@@ -55,7 +56,7 @@ jobs:
           docker push ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-armv7
 
       - name: Create and push manifest for branch tag
-        if: startsWith(github.head_ref, 'dev/')
+        if: startsWith(github.head_ref, 'dev/') || github.event_name == 'workflow_dispatch'
         run: |
           docker manifest create ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }} \
                                  ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}-arm64 \
@@ -64,7 +65,7 @@ jobs:
           docker manifest push ghcr.io/${{ github.repository }}:dev-${{ steps.sanitize_branch.outputs.sanitized_branch }}
 
       - name: Show summary
-        if: startsWith(github.head_ref, 'dev/')
+        if: startsWith(github.head_ref, 'dev/') || github.event_name == 'workflow_dispatch'
         run: |
           echo 'Snapshot: ${{ steps.release.outputs.version }}  ' >> ${GITHUB_STEP_SUMMARY}
           echo 'Published:  ' >> ${GITHUB_STEP_SUMMARY}
