@@ -6,6 +6,7 @@ before:
 
 builds:
   - id: linux-arm7
+    main: ./cmd/speedtest-cli
     env:
       - CGO_ENABLED=0
     ldflags: -s -w -X main.version={{ .Version }}
@@ -16,6 +17,7 @@ builds:
     goarm:
       - '7'
   - id: cross
+    main: ./cmd/speedtest-cli
     env:
       - CGO_ENABLED=0
     ldflags: -s -w -X main.version={{ .Version }}
