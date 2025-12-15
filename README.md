@@ -23,7 +23,7 @@ Installation
 Dowload a pre-built binary from [releases](https://github.com/fopina/speedtest-cli/releases) such as:
 
 ```
-curl -L https://github.com/fopina/speedtest-cli/releases/download/v1.0.0/speedtest-cli_linux_amd64 -o /usr/local/bin/speedtest-cli
+curl -L https://github.com/fopina/speedtest-cli/releases/download/v2.0.0/speedtest-cli_2.0.0_linux_amd64 -o /usr/local/bin/speedtest-cli
 chmod a+x /usr/local/bin/speedtest-cli
 ```
 
