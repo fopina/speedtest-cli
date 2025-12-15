@@ -1,24 +1,25 @@
-package speedtestdotnet
+package fastdotcom
 
 import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
+	"github.com/fopina/speedtest-cli/fastdotcom"
 	"github.com/fopina/speedtest-cli/oututil"
-	"github.com/fopina/speedtest-cli/speedtestdotnet"
 	"github.com/fopina/speedtest-cli/units"
 	"golang.org/x/sync/errgroup"
 )
 
-func download(client *speedtestdotnet.Client, server speedtestdotnet.Server) {
-	ctx, cancel := context.WithTimeout(context.Background(), *dlTime)
+func download(m *fastdotcom.Manifest, client *fastdotcom.Client) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(dlTime)*time.Second)
 	defer cancel()
 
 	stream, finalize := proberPrinter(func(s units.BytesPerSecond) string {
 		return formatSpeed("Download speed", s)
 	})
-	speed, err := server.ProbeDownloadSpeed(ctx, client, stream)
+	speed, err := m.ProbeDownloadSpeed(ctx, client, stream)
 	if err != nil {
 		log.Fatalf("Error probing download speed: %v", err)
 		return
@@ -26,16 +27,17 @@ func download(client *speedtestdotnet.Client, server speedtestdotnet.Server) {
 	finalize(speed)
 }
 
-func upload(client *speedtestdotnet.Client, server speedtestdotnet.Server) {
-	ctx, cancel := context.WithTimeout(context.Background(), *ulTime)
+func upload(m *fastdotcom.Manifest, client *fastdotcom.Client) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(ulTime)*time.Second)
 	defer cancel()
 
 	stream, finalize := proberPrinter(func(s units.BytesPerSecond) string {
 		return formatSpeed("Upload speed", s)
 	})
-	speed, err := server.ProbeUploadSpeed(ctx, client, stream)
+	speed, err := m.ProbeUploadSpeed(ctx, client, stream)
 	if err != nil {
 		log.Fatalf("Error probing upload speed: %v", err)
+		return
 	}
 	finalize(speed)
 }
@@ -66,7 +68,7 @@ func proberPrinter(format func(units.BytesPerSecond) string) (
 func formatSpeed(prefix string, s units.BytesPerSecond) string {
 	var i interface{}
 	// Default return speed is in bytes.
-	if *fmtBytes {
+	if fmtBytes {
 		i = s
 	} else {
 		i = s.BitsPerSecond()

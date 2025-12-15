@@ -3,22 +3,19 @@ package fastdotcom
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/fopina/speedtest-cli/fastdotcom"
+	"github.com/spf13/cobra"
 )
 
-func Main(args []string) {
-	err := flagSet.Parse(args)
-	if err != nil {
-		panic(err)
-	}
-
+func Main(cmd *cobra.Command, args []string) {
 	var client fastdotcom.Client
 
-	ctx, cancel := context.WithTimeout(context.Background(), *cfgTime)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfgTime)*time.Second)
 	defer cancel()
 
-	m, err := fastdotcom.GetManifest(ctx, *urlCount)
+	m, err := fastdotcom.GetManifest(ctx, urlCount)
 	if err != nil {
 		log.Fatalf("Error loading fast.com configuration: %v", err)
 	}
