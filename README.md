@@ -1,7 +1,13 @@
 speedtest.net CLI
 =================
 
-[![🧪 tests](https://github.com/fopina/speedtest-cli/actions/workflows/test.yml/badge.svg)](https://github.com/fopina/speedtest-cli/actions/workflows/test.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/fopina/speedtest-cli)](https://goreportcard.com/report/github.com/fopina/speedtest-cli) [![codecov](https://codecov.io/gh/fopina/speedtest-cli/graph/badge.svg)](https://codecov.io/gh/fopina/speedtest-cli)
+[![goreference](https://pkg.go.dev/badge/github.com/fopina/speedtest-cli.svg)](https://pkg.go.dev/github.com/fopina/speedtest-cli)
+[![release](https://img.shields.io/github/v/release/fopina/speedtest-cli)](https://github.com/fopina/speedtest-cli/releases)
+[![downloads](https://img.shields.io/github/downloads/fopina/speedtest-cli/total.svg)](https://github.com/fopina/speedtest-cli/releases)
+[![ci](https://github.com/fopina/speedtest-cli/actions/workflows/publish-main.yml/badge.svg)](https://github.com/fopina/speedtest-cli/actions/workflows/publish-main.yml)
+[![test](https://github.com/fopina/speedtest-cli/actions/workflows/test.yml/badge.svg)](https://github.com/fopina/speedtest-cli/actions/workflows/test.yml)
+[![codecov](https://codecov.io/github/fopina/speedtest-cli/graph/badge.svg)](https://codecov.io/github/fopina/speedtest-cli)
+[![Go Report Card](https://goreportcard.com/badge/github.com/fopina/speedtest-cli)](https://goreportcard.com/report/github.com/fopina/speedtest-cli)
 
 > Forked from [surol/speedtest-cli](https://github.com/surol/speedtest-cli).  
 > Detached as it has been archived and no longer makes sense to have it as default PR target  
