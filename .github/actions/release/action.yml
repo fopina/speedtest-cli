@@ -28,10 +28,26 @@ runs:
         username: ${{ github.actor }}
         password: ${{ inputs.github-token }}
 
+
     - name: Run GoReleaser
+      id: goreleaser
       uses: goreleaser/goreleaser-action@v6
       with:
         version: '~> v2'
         args: release --clean ${{ inputs.flags }}
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
+
+    - name: Print released version
+      shell: bash
+      run: |
+        if [ "${{ steps.goreleaser.outputs.metadata }}" ]; then
+          VERSION=$(jq -r '.version' <<< '${{ steps.goreleaser.outputs.metadata }}')
+          echo "Released version: $VERSION"
+        else
+          echo "No release metadata available"
+        fi
+    
+    - name: test
+      shell: bash
+      run: echo "Test step completed"
