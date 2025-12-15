@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"sort"
+	"time"
 
 	"github.com/fopina/speedtest-cli/geo"
 	"golang.org/x/sync/errgroup"
@@ -13,15 +14,17 @@ import (
 type ServerID uint64
 
 type Server struct {
-	ID          ServerID `xml:"id,attr"`
-	Name        string   `xml:"name,attr"`
-	Coordinates geo.Coordinates
-	URL         string `xml:"url,attr"`
-	URL2        string `xml:"url2,attr"`
-	Country     string `xml:"country,attr"`
-	CC          string `xml:"cc,attr"`
-	Sponsor     string `xml:"sponsor,attr"`
-	Host        string `xml:"host,attr"`
+	ID           ServerID `xml:"id,attr"`
+	Name         string   `xml:"name,attr"`
+	Coordinates  geo.Coordinates
+	URL          string `xml:"url,attr"`
+	URL2         string `xml:"url2,attr"`
+	Country      string `xml:"country,attr"`
+	CC           string `xml:"cc,attr"`
+	Sponsor      string `xml:"sponsor,attr"`
+	Host         string `xml:"host,attr"`
+	LastLatency  time.Duration
+	LastDistance geo.Kilometers
 }
 
 func (s Server) String() string {
