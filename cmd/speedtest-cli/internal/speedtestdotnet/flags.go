@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/fopina/speedtest-cli/speedtestdotnet"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -48,4 +49,20 @@ func (l *serverIDList) String() string {
 		sl[i] = strconv.Itoa(int(j))
 	}
 	return strings.Join(sl, ",")
+}
+
+func (l *serverIDList) Type() string {
+	return "serverIDList"
+}
+
+// InitFlags initializes Cobra flags for the speedtestdotnet command
+func InitFlags(cmd *cobra.Command) {
+	cmd.Flags().Bool("bytes", false, "Display speeds in SI bytes (default is bits)")
+	cmd.Flags().Bool("list", false, "List the available servers and exit")
+	cmd.Flags().Uint64("server", 0, "Override automatic server selection")
+	cmd.Flags().Duration("time.config", 1*time.Second, "Timeout for getting initial configuration")
+	cmd.Flags().Duration("time.latency", 1*time.Second, "Timeout for latency detection phase")
+	cmd.Flags().Duration("time.download", 10*time.Second, "Maximum time to spend in download probe phase")
+	cmd.Flags().Duration("time.upload", 10*time.Second, "Maximum time to spend in upload probe phase")
+	cmd.Flags().Var(&srvBlk, "server_blocklist", "CSV of server IDs to ignore")
 }

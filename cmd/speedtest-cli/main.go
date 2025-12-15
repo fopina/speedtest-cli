@@ -1,76 +1,63 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
-	"slices"
-	"strings"
 
 	"github.com/fopina/speedtest-cli/cmd/speedtest-cli/internal/fastdotcom"
 	"github.com/fopina/speedtest-cli/cmd/speedtest-cli/internal/speedtestdotnet"
 	"github.com/fopina/speedtest-cli/cmd/speedtest-cli/internal/version"
+	"github.com/spf13/cobra"
 )
 
-type subcmd struct {
-	mainFunc func(args []string)
-	aliases  []string
-}
-
-var subcmds = []subcmd{
-	{
-		mainFunc: speedtestdotnet.Main,
-		aliases:  []string{"st", "speedtest.net"},
-	},
-	{
-		mainFunc: fastdotcom.Main,
-		aliases:  []string{"f", "fast.com"},
-	},
-	{
-		mainFunc: version.Main,
-		aliases:  []string{"v", "version"},
-	},
-}
-
 func main() {
-	flag.Usage = usage
-	flag.Parse()
+	cmd := &cobra.Command{
+		Use:   "speedtest-cli",
+		Short: "A command-line interface for internet speed testing",
+		Long: `speedtest-cli provides a command-line interface for testing internet connection speeds
+using multiple backends including speedtest.net and fast.com.
 
-	if len(flag.Args()) < 1 {
-		// Default to first subcommand ("st" - speedtest.net) when no subcommand is provided
-		subcmds[0].mainFunc([]string{})
-		return
+If no subcommand is provided, it defaults to speedtest.net (st).`,
+		Run: func(cmd *cobra.Command, args []string) {
+			// Default to speedtestdotnet when no subcommand is provided
+			speedtestdotnet.Main(args)
+		},
 	}
-	s := getSubcmd()
-	if s == nil {
-		flag.Usage()
-		os.Exit(2)
-	}
-	s.mainFunc(flag.Args()[1:])
-}
 
-func getSubcmd() *subcmd {
-	args := flag.Args()
-	for _, s := range subcmds {
-		if slices.Contains(s.aliases, args[0]) {
-			return &s
-		}
+	// Add speedtestdotnet command
+	speedtestCmd := &cobra.Command{
+		Use:     "st [OPTIONS]",
+		Aliases: []string{"speedtest.net"},
+		Short:   "Run speed test using speedtest.net",
+		Long:    "Run a speed test using the speedtest.net backend",
+		Run:     func(cmd *cobra.Command, args []string) { speedtestdotnet.Main(args) },
 	}
-	return nil
-}
+	speedtestdotnet.InitFlags(speedtestCmd)
+	cmd.AddCommand(speedtestCmd)
 
-func usage() {
-	fmt.Fprintf(flag.CommandLine.Output(), "USAGE\n")
-	for _, s := range subcmds {
-		fmt.Fprintf(
-			flag.CommandLine.Output(),
-			"  %s %s [OPTIONS]\n",
-			os.Args[0], strings.Join(s.aliases, "|"))
+	// Add fastdotcom command
+	fastCmd := &cobra.Command{
+		Use:     "f [OPTIONS]",
+		Aliases: []string{"fast.com"},
+		Short:   "Run speed test using fast.com",
+		Long:    "Run a speed test using the fast.com backend",
+		Run:     func(cmd *cobra.Command, args []string) { fastdotcom.Main(args) },
 	}
-	fmt.Fprintf(
-		flag.CommandLine.Output(),
-		"`%s` is used if none is specified\n",
-		subcmds[0].aliases[0],
-	)
-	flag.PrintDefaults()
+	fastdotcom.InitFlags(fastCmd)
+	cmd.AddCommand(fastCmd)
+
+	// Add version command
+	versionCmd := &cobra.Command{
+		Use:     "v [OPTIONS]",
+		Aliases: []string{"version"},
+		Short:   "Show version information",
+		Long:    "Display version information about speedtest-cli",
+		Run:     func(cmd *cobra.Command, args []string) { version.Main(args) },
+	}
+	cmd.AddCommand(versionCmd)
+
+	if err := cmd.Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
 }
