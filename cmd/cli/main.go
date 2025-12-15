@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fopina/speedtest-cli/cmd/speedtest-cli/internal/fastdotcom"
-	"github.com/fopina/speedtest-cli/cmd/speedtest-cli/internal/speedtestdotnet"
-	"github.com/fopina/speedtest-cli/cmd/speedtest-cli/internal/version"
+	"github.com/fopina/speedtest-cli/cmd/cli/internal/fastdotcom"
+	"github.com/fopina/speedtest-cli/cmd/cli/internal/speedtestdotnet"
+	"github.com/fopina/speedtest-cli/cmd/cli/internal/version"
 	"github.com/spf13/cobra"
 )
 
-func main() {
+func newRootCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "speedtest-cli",
 		Short: "A command-line interface for internet speed testing",
@@ -55,7 +55,11 @@ If no subcommand is provided, it defaults to speedtest.net (st).`,
 		Run:     func(cmd *cobra.Command, args []string) { version.Main(args) },
 	}
 	cmd.AddCommand(versionCmd)
+	return cmd
+}
 
+func main() {
+	cmd := newRootCommand()
 	if err := cmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
