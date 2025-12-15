@@ -4,10 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/fopina/speedtest-cli/cmd/speedtest-cli/internal/fastdotcom"
 	"github.com/fopina/speedtest-cli/cmd/speedtest-cli/internal/speedtestdotnet"
+	"github.com/fopina/speedtest-cli/cmd/speedtest-cli/internal/version"
 )
 
 type subcmd struct {
@@ -16,13 +18,17 @@ type subcmd struct {
 }
 
 var subcmds = []subcmd{
-	subcmd{
+	{
 		mainFunc: speedtestdotnet.Main,
 		aliases:  []string{"st", "speedtest.net"},
 	},
-	subcmd{
+	{
 		mainFunc: fastdotcom.Main,
 		aliases:  []string{"f", "fast.com"},
+	},
+	{
+		mainFunc: version.Main,
+		aliases:  []string{"v", "version"},
 	},
 }
 
@@ -30,24 +36,24 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
+	if len(flag.Args()) < 1 {
+		// Default to first subcommand ("st" - speedtest.net) when no subcommand is provided
+		subcmds[0].mainFunc([]string{})
+		return
+	}
 	s := getSubcmd()
 	if s == nil {
 		flag.Usage()
 		os.Exit(2)
 	}
-	s.mainFunc(flag.Args())
+	s.mainFunc(flag.Args()[1:])
 }
 
 func getSubcmd() *subcmd {
 	args := flag.Args()
-	if len(args) < 1 {
-		return nil
-	}
 	for _, s := range subcmds {
-		for _, a := range s.aliases {
-			if a == args[0] {
-				return &s
-			}
+		if slices.Contains(s.aliases, args[0]) {
+			return &s
 		}
 	}
 	return nil
@@ -61,5 +67,10 @@ func usage() {
 			"  %s %s [OPTIONS]\n",
 			os.Args[0], strings.Join(s.aliases, "|"))
 	}
+	fmt.Fprintf(
+		flag.CommandLine.Output(),
+		"`%s` is used if none is specified\n",
+		subcmds[0].aliases[0],
+	)
 	flag.PrintDefaults()
 }

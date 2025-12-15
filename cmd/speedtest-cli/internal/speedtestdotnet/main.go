@@ -9,7 +9,7 @@ import (
 )
 
 func Main(args []string) {
-	err := flagSet.Parse(args[1:])
+	err := flagSet.Parse(args)
 	if err != nil {
 		panic(err)
 	}
