@@ -2,11 +2,11 @@ package fastdotcom
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/fopina/speedtest-cli/cmd/cli/internal"
 	"github.com/fopina/speedtest-cli/fastdotcom"
 	"github.com/fopina/speedtest-cli/units"
 	"github.com/spf13/cobra"
@@ -31,83 +31,36 @@ func Main(cmd *cobra.Command, args []string) {
 		log.Fatalf("Error loading fast.com configuration: %v", err)
 	}
 
-	// Run download and upload tests and collect results
-	var result Result
-	downloadSpeed, downloadBits := runDownloadTest(m, &client)
-	uploadSpeed, uploadBits := runUploadTest(m, &client)
-
-	result.DownloadSpeed = downloadSpeed
-	result.UploadSpeed = uploadSpeed
-	result.DownloadBits = downloadBits
-	result.UploadBits = uploadBits
-
-	// Output results
-	if jsonOut {
-		jsonData, err := json.MarshalIndent(result, "", "  ")
-		if err != nil {
-			log.Fatalf("Error marshaling JSON: %v", err)
-		}
-		fmt.Println(string(jsonData))
+	if !jsonOut {
+		download(m, &client)
+		upload(m, &client)
 	} else {
-		fmt.Printf("Download: %.2f Mb/s\n", downloadSpeed)
-		fmt.Printf("Upload: %.2f Mb/s\n", uploadSpeed)
-	}
-}
-
-// Helper function to run download test and return results
-func runDownloadTest(m *fastdotcom.Manifest, client *fastdotcom.Client) (float64, uint64) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(dlTime)*time.Second)
-	defer cancel()
-
-	stream := make(chan units.BytesPerSecond, 1)
-
-	go func() {
-		speed, err := m.ProbeDownloadSpeed(ctx, client, stream)
+		var result internal.Result
+		dspeed, err := runTest(&client, m.ProbeDownloadSpeed)
 		if err != nil {
 			log.Fatalf("Error probing download speed: %v", err)
+			return
 		}
-		stream <- speed
-	}()
 
-	var finalSpeed units.BytesPerSecond
-	select {
-	case finalSpeed = <-stream:
-	case <-ctx.Done():
-		log.Fatalf("Download test timed out")
-	}
-
-	// Convert to Mbps and bits per second
-	speedMbps := float64(finalSpeed) / 125000 // Convert bytes/s to Mbps
-	bitsPerSecond := uint64(finalSpeed) * 8   // Convert bytes/s to bits/s
-
-	return speedMbps, bitsPerSecond
-}
-
-// Helper function to run upload test and return results
-func runUploadTest(m *fastdotcom.Manifest, client *fastdotcom.Client) (float64, uint64) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(ulTime)*time.Second)
-	defer cancel()
-
-	stream := make(chan units.BytesPerSecond, 1)
-
-	go func() {
-		speed, err := m.ProbeUploadSpeed(ctx, client, stream)
+		uspeed, err := runTest(&client, m.ProbeUploadSpeed)
 		if err != nil {
 			log.Fatalf("Error probing upload speed: %v", err)
+			return
 		}
-		stream <- speed
-	}()
 
-	var finalSpeed units.BytesPerSecond
-	select {
-	case finalSpeed = <-stream:
-	case <-ctx.Done():
-		log.Fatalf("Upload test timed out")
+		result.SetSpeeds(dspeed, uspeed, fmtBytes)
+		fmt.Println(result.JSON())
 	}
+}
 
-	// Convert to Mbps and bits per second
-	speedMbps := float64(finalSpeed) / 125000 // Convert bytes/s to Mbps
-	bitsPerSecond := uint64(finalSpeed) * 8   // Convert bytes/s to bits/s
-
-	return speedMbps, bitsPerSecond
+func runTest(client *fastdotcom.Client, testFunc func(ctx context.Context,
+	client *fastdotcom.Client,
+	stream chan<- units.BytesPerSecond) (units.BytesPerSecond, error)) (units.BytesPerSecond, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(dlTime)*time.Second)
+	defer cancel()
+	speed, err := testFunc(ctx, client, nil)
+	if err != nil {
+		return 0, err
+	}
+	return speed, nil
 }

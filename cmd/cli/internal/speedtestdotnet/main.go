@@ -2,7 +2,6 @@ package speedtestdotnet
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -47,40 +46,24 @@ func Main(cmd *cobra.Command, args []string) {
 		result.ISP = cfg.ISP
 		result.IP = cfg.IP
 
-		dspeed, err := runTest(&client, server, server.ProbeDownloadSpeed)
+		dspeed, err := runTest(&client, server.ProbeDownloadSpeed)
 		if err != nil {
 			log.Fatalf("Error probing download speed: %v", err)
 			return
 		}
 
-		uspeed, err := runTest(&client, server, server.ProbeUploadSpeed)
+		uspeed, err := runTest(&client, server.ProbeUploadSpeed)
 		if err != nil {
 			log.Fatalf("Error probing upload speed: %v", err)
 			return
 		}
 
-		if fmtBytes {
-			result.DownloadSpeed = uint64(dspeed)
-			result.UploadSpeed = uint64(uspeed)
-			result.DownloadPretty = dspeed.String()
-			result.UploadPretty = uspeed.String()
-		} else {
-			result.DownloadSpeed = uint64(dspeed.BitsPerSecond())
-			result.UploadSpeed = uint64(uspeed.BitsPerSecond())
-			result.DownloadPretty = dspeed.BitsPerSecond().String()
-			result.UploadPretty = uspeed.BitsPerSecond().String()
-		}
-
-		// Output results
-		jsonData, err := json.MarshalIndent(result, "", "  ")
-		if err != nil {
-			log.Fatalf("Error marshaling JSON: %v", err)
-		}
-		fmt.Println(string(jsonData))
+		result.SetSpeeds(dspeed, uspeed, fmtBytes)
+		fmt.Println(result.JSON())
 	}
 }
 
-func runTest(client *speedtestdotnet.Client, server speedtestdotnet.Server, testFunc func(ctx context.Context,
+func runTest(client *speedtestdotnet.Client, testFunc func(ctx context.Context,
 	client *speedtestdotnet.Client,
 	stream chan<- units.BytesPerSecond) (units.BytesPerSecond, error)) (units.BytesPerSecond, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(dlTime)*time.Second)
