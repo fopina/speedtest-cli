@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -60,7 +60,7 @@ func getManifestString(ctx context.Context, u string) (string, error) {
 		return "", fmt.Errorf("fastdotcom: could not get manifest: %w", err)
 	}
 	defer res.Body.Close()
-	b, err := ioutil.ReadAll(res.Body)
+	b, err := io.ReadAll(res.Body)
 	if err != nil {
 		return "", fmt.Errorf("fastdotcom: could not read manifest: %w", err)
 	}
@@ -70,7 +70,7 @@ func getManifestString(ctx context.Context, u string) (string, error) {
 func makeManifestURL(token string, urls int) string {
 	u, err := url.Parse("https://api.fast.com/netflix/speedtest/v2")
 	if err != nil {
-		panic(err)
+		return ""
 	}
 
 	q := make(url.Values)

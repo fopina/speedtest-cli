@@ -2,7 +2,7 @@ package fastdotcom
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 
 	"github.com/fopina/speedtest-cli/prober"
 	"github.com/fopina/speedtest-cli/prober/proberutil"
@@ -59,7 +59,7 @@ func (c *Client) uploadFile(
 		return t, err
 	}
 	defer res.Body.Close()
-	if _, err = ioutil.ReadAll(res.Body); err != nil {
+	if _, err = io.ReadAll(res.Body); err != nil {
 		return prober.BytesTransferred(0), err
 	}
 	return prober.BytesTransferred(size), nil

@@ -3,7 +3,7 @@ package internal
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -41,7 +41,7 @@ func getHTML(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("fastdotcom: could not get fast.com HTML: %w", err)
 	}
 	defer res.Body.Close()
-	b, err := ioutil.ReadAll(res.Body)
+	b, err := io.ReadAll(res.Body)
 	if err != nil {
 		return "", fmt.Errorf("fastdotcom: could not read fast.com HTML: %w", err)
 	}
@@ -61,7 +61,7 @@ func extractJSPath(html string) string {
 func getJS(ctx context.Context, jsPath string) (string, error) {
 	u, err := url.Parse("https://fast.com")
 	if err != nil {
-		panic(err)
+		return "", fmt.Errorf("fastdotcom: impossible to parse fast.com URL: %w", err) // replace panic with error
 	}
 	u.Path = jsPath
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
@@ -73,7 +73,7 @@ func getJS(ctx context.Context, jsPath string) (string, error) {
 		return "", fmt.Errorf("fastdotcom: could not get fast.com JS: %w", err)
 	}
 	defer res.Body.Close()
-	b, err := ioutil.ReadAll(res.Body)
+	b, err := io.ReadAll(res.Body)
 	if err != nil {
 		return "", fmt.Errorf("fastdotcom: could not read fast.com JS: %w", err)
 	}
