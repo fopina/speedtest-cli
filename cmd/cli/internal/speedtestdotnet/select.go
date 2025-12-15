@@ -2,7 +2,6 @@ package speedtestdotnet
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -69,7 +68,10 @@ func selectServer(client *speedtestdotnet.Client, cfg speedtestdotnet.Config, se
 		distance = distanceMap[server.ID]
 	}
 
-	fmt.Printf("Using server %d hosted by %s (%s) [%v]: %.1f ms\n",
+	server.LastLatency = latency
+	server.LastDistance = distance
+
+	log.Printf("Using server %d hosted by %s (%s) [%v]: %.1f ms\n",
 		server.ID, server.Sponsor, server.Name, distance, float64(latency)/float64(time.Millisecond))
 
 	return server

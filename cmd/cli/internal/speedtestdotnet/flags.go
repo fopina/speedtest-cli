@@ -18,6 +18,7 @@ var (
 	dlTime   = 10 // stored as int for seconds
 	ulTime   = 10 // stored as int for seconds
 	srvBlk   serverIDList
+	jsonOut  bool
 )
 
 type serverIDList []speedtestdotnet.ServerID
@@ -58,4 +59,5 @@ func InitFlags(cmd *cobra.Command) {
 	cmd.Flags().IntVar(&dlTime, "time.download", 10, "Maximum time to spend in download probe phase (seconds)")
 	cmd.Flags().IntVar(&ulTime, "time.upload", 10, "Maximum time to spend in upload probe phase (seconds)")
 	cmd.Flags().Var(&srvBlk, "server_blocklist", "CSV of server IDs to ignore")
+	cmd.Flags().BoolVar(&jsonOut, "json", false, "Output results in JSON format")
 }
