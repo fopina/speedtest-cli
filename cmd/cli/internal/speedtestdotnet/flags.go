@@ -1,31 +1,24 @@
 package speedtestdotnet
 
 import (
-	"flag"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/fopina/speedtest-cli/speedtestdotnet"
 	"github.com/spf13/cobra"
 )
 
+// Global variables to store flag values
 var (
-	flagSet  = flag.NewFlagSet("speedtestdotnet", flag.ExitOnError)
-	fmtBytes = flagSet.Bool("bytes", false, "Display speeds in SI bytes (default is bits)")
-	list     = flagSet.Bool("list", false, "List the available servers and exit")
-	srvID    = flagSet.Uint64("server", 0, "Override automatic server selection")
-	cfgTime  = flagSet.Duration("time.config", 1*time.Second, "Timeout for getting initial configuration")
-	pngTime  = flagSet.Duration("time.latency", 1*time.Second, "Timeout for latency detection phase")
-	dlTime   = flagSet.Duration("time.download", 10*time.Second, "Maximum time to spend in download probe phase")
-	ulTime   = flagSet.Duration("time.upload", 10*time.Second, "Maximum time to spend in upload probe phase")
+	fmtBytes bool
+	list     bool
+	srvID    uint64
+	cfgTime  = 1  // stored as int for seconds
+	pngTime  = 1  // stored as int for seconds
+	dlTime   = 10 // stored as int for seconds
+	ulTime   = 10 // stored as int for seconds
+	srvBlk   serverIDList
 )
-
-var srvBlk serverIDList
-
-func init() {
-	flagSet.Var(&srvBlk, "server_blocklist", "CSV of server IDs to ignore")
-}
 
 type serverIDList []speedtestdotnet.ServerID
 
@@ -57,12 +50,12 @@ func (l *serverIDList) Type() string {
 
 // InitFlags initializes Cobra flags for the speedtestdotnet command
 func InitFlags(cmd *cobra.Command) {
-	cmd.Flags().Bool("bytes", false, "Display speeds in SI bytes (default is bits)")
-	cmd.Flags().Bool("list", false, "List the available servers and exit")
-	cmd.Flags().Uint64("server", 0, "Override automatic server selection")
-	cmd.Flags().Duration("time.config", 1*time.Second, "Timeout for getting initial configuration")
-	cmd.Flags().Duration("time.latency", 1*time.Second, "Timeout for latency detection phase")
-	cmd.Flags().Duration("time.download", 10*time.Second, "Maximum time to spend in download probe phase")
-	cmd.Flags().Duration("time.upload", 10*time.Second, "Maximum time to spend in upload probe phase")
+	cmd.Flags().BoolVar(&fmtBytes, "bytes", false, "Display speeds in SI bytes (default is bits)")
+	cmd.Flags().BoolVar(&list, "list", false, "List the available servers and exit")
+	cmd.Flags().Uint64Var(&srvID, "server", 0, "Override automatic server selection")
+	cmd.Flags().IntVar(&cfgTime, "time.config", 1, "Timeout for getting initial configuration (seconds)")
+	cmd.Flags().IntVar(&pngTime, "time.latency", 1, "Timeout for latency detection phase (seconds)")
+	cmd.Flags().IntVar(&dlTime, "time.download", 10, "Maximum time to spend in download probe phase (seconds)")
+	cmd.Flags().IntVar(&ulTime, "time.upload", 10, "Maximum time to spend in upload probe phase (seconds)")
 	cmd.Flags().Var(&srvBlk, "server_blocklist", "CSV of server IDs to ignore")
 }

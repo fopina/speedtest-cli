@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/fopina/speedtest-cli/speedtestdotnet"
 )
@@ -44,7 +45,7 @@ func pruneBlockedServers(servers []speedtestdotnet.Server) []speedtestdotnet.Ser
 
 // Iterates through the list of server and prints them out.
 func printServers(client *speedtestdotnet.Client) {
-	ctx, cancel := context.WithTimeout(context.Background(), *cfgTime)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfgTime)*time.Second)
 	defer cancel()
 
 	for _, s := range listServers(ctx, client) {

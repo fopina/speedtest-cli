@@ -20,7 +20,7 @@ using multiple backends including speedtest.net and fast.com.
 If no subcommand is provided, it defaults to speedtest.net (st).`,
 		Run: func(cmd *cobra.Command, args []string) {
 			// Default to speedtestdotnet when no subcommand is provided
-			speedtestdotnet.Main(args)
+			speedtestdotnet.Main(cmd, args)
 		},
 	}
 
@@ -30,7 +30,7 @@ If no subcommand is provided, it defaults to speedtest.net (st).`,
 		Aliases: []string{"speedtest.net"},
 		Short:   "Run speed test using speedtest.net",
 		Long:    "Run a speed test using the speedtest.net backend",
-		Run:     func(cmd *cobra.Command, args []string) { speedtestdotnet.Main(args) },
+		Run:     speedtestdotnet.Main,
 	}
 	speedtestdotnet.InitFlags(speedtestCmd)
 	cmd.AddCommand(speedtestCmd)
@@ -41,7 +41,7 @@ If no subcommand is provided, it defaults to speedtest.net (st).`,
 		Aliases: []string{"fast.com"},
 		Short:   "Run speed test using fast.com",
 		Long:    "Run a speed test using the fast.com backend",
-		Run:     func(cmd *cobra.Command, args []string) { fastdotcom.Main(args) },
+		Run:     fastdotcom.Main,
 	}
 	fastdotcom.InitFlags(fastCmd)
 	cmd.AddCommand(fastCmd)

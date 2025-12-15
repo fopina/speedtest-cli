@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	"time"
+
 	"github.com/fopina/speedtest-cli/oututil"
 	"github.com/fopina/speedtest-cli/speedtestdotnet"
 	"github.com/fopina/speedtest-cli/units"
@@ -12,7 +14,7 @@ import (
 )
 
 func download(client *speedtestdotnet.Client, server speedtestdotnet.Server) {
-	ctx, cancel := context.WithTimeout(context.Background(), *dlTime)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(dlTime)*time.Second)
 	defer cancel()
 
 	stream, finalize := proberPrinter(func(s units.BytesPerSecond) string {
@@ -27,7 +29,7 @@ func download(client *speedtestdotnet.Client, server speedtestdotnet.Server) {
 }
 
 func upload(client *speedtestdotnet.Client, server speedtestdotnet.Server) {
-	ctx, cancel := context.WithTimeout(context.Background(), *ulTime)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(ulTime)*time.Second)
 	defer cancel()
 
 	stream, finalize := proberPrinter(func(s units.BytesPerSecond) string {
@@ -66,7 +68,7 @@ func proberPrinter(format func(units.BytesPerSecond) string) (
 func formatSpeed(prefix string, s units.BytesPerSecond) string {
 	var i interface{}
 	// Default return speed is in bytes.
-	if *fmtBytes {
+	if fmtBytes {
 		i = s
 	} else {
 		i = s.BitsPerSecond()

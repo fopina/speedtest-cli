@@ -19,11 +19,11 @@ func selectServer(client *speedtestdotnet.Client, cfg speedtestdotnet.Config, se
 		server   speedtestdotnet.Server
 	)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *pngTime)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(pngTime)*time.Second)
 	defer cancel()
 
-	if *srvID != 0 {
-		id := speedtestdotnet.ServerID(*srvID)
+	if srvID != 0 {
+		id := speedtestdotnet.ServerID(srvID)
 
 		// Meh, linear search.
 		i := -1

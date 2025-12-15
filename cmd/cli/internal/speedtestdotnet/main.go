@@ -4,24 +4,24 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/fopina/speedtest-cli/speedtestdotnet"
+	"github.com/spf13/cobra"
 )
 
-func Main(args []string) {
-	err := flagSet.Parse(args)
-	if err != nil {
-		panic(err)
-	}
+func Main(cmd *cobra.Command, args []string) {
+	// Parse Cobra flags (this is handled by Cobra automatically)
+	// cmd.ParseFlags(args) // Cobra handles this automatically
 
 	var client speedtestdotnet.Client
 
-	if *list {
+	if list {
 		printServers(&client)
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *cfgTime)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfgTime)*time.Second)
 	defer cancel()
 
 	cfg, err := client.Config(ctx)
