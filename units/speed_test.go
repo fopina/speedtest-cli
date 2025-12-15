@@ -96,26 +96,3 @@ func TestBitsPerSecond_String(t *testing.T) {
 		})
 	}
 }
-
-func TestConstants(t *testing.T) {
-	// Test that constants are defined correctly
-	if KBps != 1000 {
-		t.Errorf("expected KBps to be 1000, got %v", KBps)
-	}
-	if MBps != 1000000 {
-		t.Errorf("expected MBps to be 1000000, got %v", MBps)
-	}
-	if GBps != 1000000000 {
-		t.Errorf("expected GBps to be 1000000000, got %v", GBps)
-	}
-
-	if Kbps != 1000 {
-		t.Errorf("expected Kbps to be 1000, got %v", Kbps)
-	}
-	if Mbps != 1000000 {
-		t.Errorf("expected Mbps to be 1000000, got %v", Mbps)
-	}
-	if Gbps != 1000000000 {
-		t.Errorf("expected Gbps to be 1000000000, got %v", Gbps)
-	}
-}

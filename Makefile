@@ -24,7 +24,7 @@ bootstrap: ## install build deps
 
 PHONY: test
 test: clean ## display test coverage
-	go test --cover -parallel=1 -v -coverprofile=coverage.out ./...
+	go test --cover -v -coverprofile=coverage.out ./...
 	go tool cover -func=coverage.out | sort -rnk3
 	
 PHONY: clean
