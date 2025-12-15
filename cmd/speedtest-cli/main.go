@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/fopina/speedtest-cli/cmd/speedtest-cli/internal/fastdotcom"
@@ -35,19 +36,18 @@ func main() {
 		flag.Usage()
 		os.Exit(2)
 	}
-	s.mainFunc(flag.Args())
+	s.mainFunc(flag.Args()[1:])
 }
 
 func getSubcmd() *subcmd {
 	args := flag.Args()
 	if len(args) < 1 {
-		return nil
+		// Default to first subcommand ("st" - speedtest.net) when no subcommand is provided
+		return &subcmds[0]
 	}
 	for _, s := range subcmds {
-		for _, a := range s.aliases {
-			if a == args[0] {
-				return &s
-			}
+		if slices.Contains(s.aliases, args[0]) {
+			return &s
 		}
 	}
 	return nil
