@@ -9,6 +9,7 @@ import (
 
 	"github.com/fopina/speedtest-cli/cmd/speedtest-cli/internal/fastdotcom"
 	"github.com/fopina/speedtest-cli/cmd/speedtest-cli/internal/speedtestdotnet"
+	"github.com/fopina/speedtest-cli/cmd/speedtest-cli/internal/version"
 )
 
 type subcmd struct {
@@ -17,13 +18,17 @@ type subcmd struct {
 }
 
 var subcmds = []subcmd{
-	subcmd{
+	{
 		mainFunc: speedtestdotnet.Main,
 		aliases:  []string{"st", "speedtest.net"},
 	},
-	subcmd{
+	{
 		mainFunc: fastdotcom.Main,
 		aliases:  []string{"f", "fast.com"},
+	},
+	{
+		mainFunc: version.Main,
+		aliases:  []string{"v", "version"},
 	},
 }
 
