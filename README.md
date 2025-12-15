@@ -1,7 +1,7 @@
 speedtest.net CLI
 =================
 
-[![🧪 tests](https://github.com/fopina/speedtest-cli/actions/workflows/test.yml/badge.svg)](https://github.com/fopina/speedtest-cli/actions/workflows/test.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/fopina/speedtest-cli)](https://goreportcard.com/report/github.com/fopina/speedtest-cli)
+[![🧪 tests](https://github.com/fopina/speedtest-cli/actions/workflows/test.yml/badge.svg)](https://github.com/fopina/speedtest-cli/actions/workflows/test.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/fopina/speedtest-cli)](https://goreportcard.com/report/github.com/fopina/speedtest-cli) [![codecov](https://codecov.io/gh/fopina/speedtest-cli/graph/badge.svg)](https://codecov.io/gh/fopina/speedtest-cli)
 
 This is a simple command line client to speedtest.net written in Go.
 
