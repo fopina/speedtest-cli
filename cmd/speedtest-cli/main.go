@@ -31,6 +31,11 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
+	if len(flag.Args()) < 1 {
+		// Default to first subcommand ("st" - speedtest.net) when no subcommand is provided
+		subcmds[0].mainFunc([]string{})
+		return
+	}
 	s := getSubcmd()
 	if s == nil {
 		flag.Usage()
@@ -41,10 +46,6 @@ func main() {
 
 func getSubcmd() *subcmd {
 	args := flag.Args()
-	if len(args) < 1 {
-		// Default to first subcommand ("st" - speedtest.net) when no subcommand is provided
-		return &subcmds[0]
-	}
 	for _, s := range subcmds {
 		if slices.Contains(s.aliases, args[0]) {
 			return &s
@@ -61,5 +62,10 @@ func usage() {
 			"  %s %s [OPTIONS]\n",
 			os.Args[0], strings.Join(s.aliases, "|"))
 	}
+	fmt.Fprintf(
+		flag.CommandLine.Output(),
+		"`%s` is used if none is specified\n",
+		subcmds[0].aliases[0],
+	)
 	flag.PrintDefaults()
 }
