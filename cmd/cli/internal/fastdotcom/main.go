@@ -10,9 +10,6 @@ import (
 )
 
 func Main(cmd *cobra.Command, args []string) {
-	// Parse Cobra flags (this is handled by Cobra automatically)
-	// cmd.ParseFlags(args) // Cobra handles this automatically
-
 	var client fastdotcom.Client
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfgTime)*time.Second)
