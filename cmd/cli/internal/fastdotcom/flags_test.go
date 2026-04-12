@@ -15,23 +15,20 @@ func TestInitFlagsDefaults(t *testing.T) {
 	cmd := &cobra.Command{Use: "f"}
 	InitFlags(cmd)
 
-	if got := cmd.Flags().Lookup("bytes").DefValue; got != "false" {
-		t.Fatalf("bytes default = %q, want false", got)
-	}
-	if got := cmd.Flags().Lookup("urls").DefValue; got != "5" {
-		t.Fatalf("urls default = %q, want 5", got)
-	}
-	if got := cmd.Flags().Lookup("time.config").DefValue; got != "3" {
-		t.Fatalf("time.config default = %q, want 3", got)
-	}
-	if got := cmd.Flags().Lookup("time.download").DefValue; got != "10" {
-		t.Fatalf("time.download default = %q, want 10", got)
-	}
-	if got := cmd.Flags().Lookup("time.upload").DefValue; got != "10" {
-		t.Fatalf("time.upload default = %q, want 10", got)
-	}
-	if got := cmd.Flags().Lookup("json").DefValue; got != "false" {
-		t.Fatalf("json default = %q, want false", got)
+	for _, tc := range []struct {
+		name string
+		want string
+	}{
+		{name: "bytes", want: "false"},
+		{name: "urls", want: "5"},
+		{name: "time.config", want: "3"},
+		{name: "time.download", want: "10"},
+		{name: "time.upload", want: "10"},
+		{name: "json", want: "false"},
+	} {
+		if got := cmd.Flags().Lookup(tc.name).DefValue; got != tc.want {
+			t.Fatalf("%s default = %q, want %q", tc.name, got, tc.want)
+		}
 	}
 }
 
