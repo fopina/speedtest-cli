@@ -38,7 +38,7 @@ func (l *serverIDList) Set(s string) (err error) {
 }
 
 func (l *serverIDList) String() string {
-	sl := make([]string, len(*l))[:0]
+	sl := make([]string, len(*l))
 	for i, j := range *l {
 		sl[i] = strconv.Itoa(int(j))
 	}
@@ -54,8 +54,8 @@ func InitFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVar(&fmtBytes, "bytes", false, "Display speeds in SI bytes (default is bits)")
 	cmd.Flags().BoolVar(&list, "list", false, "List the available servers and exit")
 	cmd.Flags().Uint64Var(&srvID, "server", 0, "Override automatic server selection")
-	cmd.Flags().IntVar(&cfgTime, "time.config", 1, "Timeout for getting initial configuration (seconds)")
-	cmd.Flags().IntVar(&pngTime, "time.latency", 1, "Timeout for latency detection phase (seconds)")
+	cmd.Flags().IntVar(&cfgTime, "time.config", 3, "Timeout for getting initial configuration (seconds)")
+	cmd.Flags().IntVar(&pngTime, "time.latency", 3, "Timeout for latency detection phase (seconds)")
 	cmd.Flags().IntVar(&dlTime, "time.download", 10, "Maximum time to spend in download probe phase (seconds)")
 	cmd.Flags().IntVar(&ulTime, "time.upload", 10, "Maximum time to spend in upload probe phase (seconds)")
 	cmd.Flags().Var(&srvBlk, "server_blocklist", "CSV of server IDs to ignore")
