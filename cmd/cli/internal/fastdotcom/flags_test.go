@@ -21,8 +21,8 @@ func TestInitFlagsDefaults(t *testing.T) {
 	if got := cmd.Flags().Lookup("urls").DefValue; got != "5" {
 		t.Fatalf("urls default = %q, want 5", got)
 	}
-	if got := cmd.Flags().Lookup("time.config").DefValue; got != "1" {
-		t.Fatalf("time.config default = %q, want 1", got)
+	if got := cmd.Flags().Lookup("time.config").DefValue; got != "3" {
+		t.Fatalf("time.config default = %q, want 3", got)
 	}
 	if got := cmd.Flags().Lookup("time.download").DefValue; got != "10" {
 		t.Fatalf("time.download default = %q, want 10", got)
