@@ -38,7 +38,7 @@ func (l *serverIDList) Set(s string) (err error) {
 }
 
 func (l *serverIDList) String() string {
-	sl := make([]string, len(*l))[:0]
+	sl := make([]string, len(*l))
 	for i, j := range *l {
 		sl[i] = strconv.Itoa(int(j))
 	}
