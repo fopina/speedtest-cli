@@ -1,4 +1,4 @@
-projectname?=golang-template
+projectname?=speedtest-cli
 
 default: help
 
@@ -8,19 +8,12 @@ help: ## list makefile targets
 
 .PHONY: build
 build: ## build golang binary
-	@go build -ldflags "-X main.version=$(shell git describe --abbrev=0 --tags)" -o $(projectname)
-
-.PHONY: install
-install: ## install golang binary
-	@go install -ldflags "-X main.version=$(shell git describe --abbrev=0 --tags)"
+	mkdir -p dist
+	@go build -ldflags "-X main.version=$(shell git describe --abbrev=0 --tags)" -o dist/$(projectname) cmd/cli/main.go
 
 .PHONY: run
 run: ## run the app
-	@go run -ldflags "-X main.version=$(shell git describe --abbrev=0 --tags)"  main.go
-
-.PHONY: bootstrap
-bootstrap: ## install build deps
-	go generate -tags tools tools/tools.go
+	@go run -ldflags "-X main.version=$(shell git describe --abbrev=0 --tags)"  cmd/cli/main.go
 
 PHONY: test
 test: clean ## display test coverage
@@ -29,7 +22,7 @@ test: clean ## display test coverage
 	
 PHONY: clean
 clean: ## clean up environment
-	@rm -rf coverage.out dist/ $(projectname)
+	@rm -rf coverage.out dist/
 
 PHONY: cover
 race: ## display test coverage with race
