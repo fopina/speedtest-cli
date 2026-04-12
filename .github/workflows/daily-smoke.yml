@@ -1,0 +1,35 @@
+name: Daily smoke test
+
+on:
+  schedule:
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    name: Smoke (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: fast.com
+            command: f
+            args: --urls 1 
+          - name: speedtest.net
+            command: st
+            args: --time.latency 1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build CLI
+        run: go build -o ./speedtest-cli ./cmd/cli
+
+      - name: Run smoke test
+        run: ./speedtest-cli ${{ matrix.command }} ${{ matrix.args }} --json --time.download 1 --time.upload 1 --time.config 5
