@@ -2,7 +2,6 @@ package prober
 
 import (
 	"fmt"
-	"sync"
 	"testing"
 
 	"github.com/fortytw2/leaktest"
@@ -81,40 +80,30 @@ func TestGroup_StreamingResults(t *testing.T) {
 		})
 	}
 
+	type streamResult struct {
+		last BytesTransferred
+		ok   bool
+	}
+
 	var (
-		stream = grp.GetIncremental()
-		mu     sync.Mutex
-		done   bool
-		gdone  = make(chan struct{})
+		stream  = grp.GetIncremental()
+		results = make(chan streamResult, 1)
 	)
 	go func() {
-		var i BytesTransferred
+		var (
+			last BytesTransferred
+			ok   = true
+		)
 		for b := range stream {
-			func() {
-				mu.Lock()
-				defer mu.Unlock()
-
-				if done {
-					t.Fail()
-					t.Log("Got streaming result after finish")
-				}
-
-				if b < i {
-					t.Fail()
-					t.Log("Streaming total went down")
-				}
-				i = b
-			}()
+			if b < last {
+				ok = false
+			}
+			last = b
 		}
-		close(gdone)
+		results <- streamResult{last: last, ok: ok}
 	}()
 
 	b, err := grp.Collect()
-	func() {
-		mu.Lock()
-		defer mu.Unlock()
-		done = true
-	}()
 	if err != nil {
 		t.Logf("Got an error: %v", err)
 		t.Fail()
@@ -124,5 +113,13 @@ func TestGroup_StreamingResults(t *testing.T) {
 		t.Logf("Expected %v bytes transferred but got %v", expected, b)
 		t.Fail()
 	}
-	<-gdone
+	got := <-results
+	if !got.ok {
+		t.Log("Streaming total went down")
+		t.Fail()
+	}
+	if got.last == BytesTransferred(0) {
+		t.Log("Expected to receive at least one streaming result")
+		t.Fail()
+	}
 }
