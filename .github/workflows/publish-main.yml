@@ -15,14 +15,11 @@ jobs:
 
   goreleaser:
     name: publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: test
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-      
-      - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - uses: ./.github/actions/release
         id: release
