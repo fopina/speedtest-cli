@@ -32,6 +32,21 @@ builds:
 archives:
   - formats: binary
 
+brews:
+  - name: speedtest-cli
+    repository:
+      owner: fopina
+      name: homebrew-tap
+      token: "{{ .Env.TAP_TOKEN }}"
+    directory: Formula
+    homepage: https://github.com/fopina/speedtest-cli
+    description: CLI for running internet speed tests against speedtest.net and fast.com
+    license: MIT
+    install: |
+      bin.install "speedtest-cli"
+    test: |
+      system "#{bin}/speedtest-cli", "v"
+
 changelog:
   sort: asc
   filters:
