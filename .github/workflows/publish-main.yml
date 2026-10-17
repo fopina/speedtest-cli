@@ -34,3 +34,19 @@ jobs:
           echo 'Published:  ' >> ${GITHUB_STEP_SUMMARY}
           echo '* `ghcr.io/${{ github.repository }}:${{ steps.release.outputs.version }}`' >> ${GITHUB_STEP_SUMMARY}
           echo '* `ghcr.io/${{ github.repository }}:latest`' >> ${GITHUB_STEP_SUMMARY}
+
+  bump-homebrew:
+    needs: goreleaser
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Homebrew formula
+        uses: fopina/homebrew-tap@bump-action-v3
+        with:
+          version: ${{ github.ref_name }}
+          token: ${{ secrets.TAP_TOKEN }}
+          formula_class: SpeedtestCli
+          formula_file: speedtest-cli
+          description: CLI for running internet speed tests against speedtest.net and fast.com
+          bin: speedtest-cli
+          test: |
+            assert_match "version:", shell_output("#{bin}/speedtest-cli v")
